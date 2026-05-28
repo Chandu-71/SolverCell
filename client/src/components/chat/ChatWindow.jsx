@@ -8,6 +8,8 @@ import MessageBubble from './MessageBubble';
 import MessageInput from './MessageInput';
 import useSocket from '../../hooks/useSocket';
 
+import useUnreadMessagesCount from '../../hooks/useUnreadMessagesCount';
+
 // ── date separator helper ─────────────────────────────────────
 const dateLabel = iso => {
   const d = new Date(iso);
@@ -28,6 +30,8 @@ const DateSeparator = ({ label }) => (
 const ChatWindow = ({ conversation, currentUser, onBack }) => {
   const { getToken } = useAuth();
   const socket = useSocket();
+
+  const { setCount: setUnreadCount } = useUnreadMessagesCount();
 
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -67,7 +71,14 @@ const ChatWindow = ({ conversation, currentUser, onBack }) => {
   // ── join room + initial load ──────────────────────────────
   useEffect(() => {
     fetchMessages();
+
     socket.joinConversation(conversationId);
+
+    // instantly clear this conversation's unread count locally
+    if (conversation.unreadCount > 0) {
+      setUnreadCount(prev => Math.max(0, prev - conversation.unreadCount));
+    }
+
     socket.markSeen(conversationId);
 
     return () => socket.leaveConversation(conversationId);

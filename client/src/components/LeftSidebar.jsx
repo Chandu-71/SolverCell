@@ -3,12 +3,14 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { navbarItems, assets } from '../assets/assets';
 
 import useNotificationCount from '../hooks/useNotificationCount';
+import useUnreadMessagesCount from '../hooks/useUnreadMessagesCount';
 
 const iconMap = { Home, MessageSquare, Search, Bell };
 
 const LeftSidebar = ({ collapsed = false }) => {
   const navigate = useNavigate();
   const { count } = useNotificationCount();
+  const { count: unreadMessagesCount } = useUnreadMessagesCount();
 
   return (
     <aside
@@ -42,6 +44,12 @@ const LeftSidebar = ({ collapsed = false }) => {
             >
               <div className='relative shrink-0'>
                 <Icon className='h-5 w-5' />
+
+                {item.label === 'Messages' && unreadMessagesCount > 0 && (
+                  <span className='absolute -right-2 -top-2 flex min-h-4.5 min-w-4.5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white'>
+                    {unreadMessagesCount > 99 ? '99+' : unreadMessagesCount}
+                  </span>
+                )}
 
                 {item.label === 'Notifications' && count > 0 && (
                   <span className='absolute -right-2 -top-2 flex min-h-4.5 min-w-4.5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white'>

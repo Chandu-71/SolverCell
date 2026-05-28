@@ -58,6 +58,27 @@ router.get(
   }),
 );
 
+// ── GET /api/conversations/unread-count ──────────────────────
+router.get(
+  '/unread-count',
+  asyncHandler(async (req, res) => {
+    const { userId } = getAuth(req);
+    if (!userId) return res.status(401).json({ success: false, message: 'Unauthorized' });
+
+    const me = await prisma.user.findUnique({ where: { clerkId: userId } });
+    if (!me) return res.status(404).json({ success: false, message: 'User not found' });
+
+    const result = await prisma.conversationParticipant.aggregate({
+      where: { userId: me.id },
+      _sum: { unreadCount: true },
+    });
+
+    const count = result._sum.unreadCount ?? 0;
+
+    res.json({ success: true, count });
+  }),
+);
+
 // ── POST /api/conversations ───────────────────────────────────
 // Find or create a 1-to-1 conversation between me and targetUsername.
 router.post(
