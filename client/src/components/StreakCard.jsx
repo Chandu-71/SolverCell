@@ -27,14 +27,11 @@ const StreakCard = ({ stats }) => {
       {/* WEEK ACTIVITY */}
       <div className='mt-4 flex items-center justify-between'>
         {dailyActivity.map((day, index) => {
-          const active = day.solved > 0;
+          const active = day;
 
           return (
             <div key={index} className='flex flex-col items-center gap-1'>
-              <div
-                title={`${day.solved} solved`}
-                className={`h-6 w-6 rounded-md transition-all duration-200 ${active ? 'bg-rose-500' : 'bg-white/5'}`}
-              />
+              <div title={`${day} solved`} className={`h-6 w-6 rounded-md transition-all duration-200 ${active ? 'bg-rose-500' : 'bg-white/5'}`} />
 
               <span className='text-[10px] text-slate-500'>{DAY_LABELS[index]}</span>
             </div>
