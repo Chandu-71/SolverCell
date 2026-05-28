@@ -8,69 +8,93 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+// ══════════════════════════════════════════════
+//  USER
+//  clerkId is the bridge to Clerk.
+//  Created automatically when user first signs in
+//  via the /api/users/sync endpoint.
+// ══════════════════════════════════════════════
 model User {
-  id             String                    @id @default(cuid())
-  username       String                    @unique
-  bio            String?
-  updatedAt      DateTime                  @updatedAt
-  avatarUrl      String?
-  clerkId        String                    @unique
-  currentStreak  Int                       @default(0)
-  displayName    String
-  eloRating      Int                       @default(1000)
-  email          String
-  joinedAt       DateTime                  @default(now())
-  lastSolvedAt   DateTime?
-  location       String?
-  longestStreak  Int                       @default(0)
-  comments       Comment[]
-  conversations  ConversationParticipant[]
-  following      Follow[]                  @relation("follower")
-  followedBy     Follow[]                  @relation("following")
-  likes          Like[]
-  sentMessages   Message[]
-  notifications  Notification[]            @relation("recipient")
+  id          String   @id @default(cuid())
+  clerkId     String   @unique // from Clerk JWT — never changes
+  username    String   @unique
+  displayName String
+  email       String
+  avatarUrl   String?
+  bio         String?
+  location    String?
+  joinedAt    DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // stats (updated on solve events)
+  eloRating     Int       @default(1000)
+  currentStreak Int       @default(0)
+  longestStreak Int       @default(0)
+  lastSolvedAt  DateTime?
+
+  // relations
   problems       Problem[]
-  solvedProblems SolvedProblem[]
   submissions    Submission[]
+  followedBy     Follow[]        @relation("following") // people who follow this user
+  following      Follow[]        @relation("follower") // people this user follows
+  likes          Like[]
+  comments       Comment[]
+  notifications  Notification[]  @relation("recipient")
+  solvedProblems SolvedProblem[]
+  conversations ConversationParticipant[]
+  sentMessages  Message[]
 
   @@index([clerkId])
   @@index([username])
 }
 
+// ══════════════════════════════════════════════
+//  PROBLEM
+//  The "post" of your platform
+// ══════════════════════════════════════════════
 model Problem {
-  id               String          @id @default(cuid())
-  authorId         String
-  slug             String          @unique
-  title            String
-  summary          String
-  description      String
-  difficulty       Difficulty
-  constraints      String?
-  starterCode      Json?
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
-  likesCount       Int             @default(0)
-  totalAttempts    Int             @default(0)
-  successfulSolves Int             @default(0)
-  commentsCount    Int             @default(0)
-  comments         Comment[]
-  likes            Like[]
+  id          String     @id @default(cuid())
+  authorId    String // FK → User.id
+  slug        String     @unique
+  title       String
+  summary     String // feed preview teaser
+  description String     @db.Text // full markdown
+  difficulty  Difficulty
+  constraints String?    @db.Text
+  starterCode Json? // { python: "...", javascript: "..." }
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  // counters — denormalized for fast feed queries
+  // incremented by your API on each event, no joins needed
+  likesCount       Int @default(0)
+  totalAttempts    Int @default(0)
+  successfulSolves Int @default(0)
+  commentsCount    Int @default(0)
+
+  // relations
+  author      User            @relation(fields: [authorId], references: [id])
+  tags        ProblemTag[]
+  testCases   TestCase[]
+  submissions Submission[]
+  likes       Like[]
+  comments    Comment[]
+  solvedBy    SolvedProblem[]
   sharedInMessages Message[]
-  author           User            @relation(fields: [authorId], references: [id])
-  tags             ProblemTag[]
-  solvedBy         SolvedProblem[]
-  submissions      Submission[]
-  testCases        TestCase[]
 
   @@index([authorId])
   @@index([difficulty])
   @@index([createdAt])
 }
 
+// ══════════════════════════════════════════════
+//  TAG
+//  Normalized tag table.
+//  ProblemTag is the join table.
+// ══════════════════════════════════════════════
 model Tag {
   id       String       @id @default(cuid())
-  name     String       @unique
+  name     String       @unique // "Arrays", "Dynamic Programming", etc.
   problems ProblemTag[]
 }
 
@@ -83,121 +107,161 @@ model ProblemTag {
   @@id([problemId, tagId])
 }
 
+// ══════════════════════════════════════════════
+//  TEST CASE
+//  stdin / stdout format — works for every
+//  problem type (DSA, math, aptitude)
+// ══════════════════════════════════════════════
 model TestCase {
   id             String  @id @default(cuid())
   problemId      String
-  label          String?
-  input          String
-  expectedOutput String
+  label          String? // "Case 1", "Case 2"
+  input          String  @db.Text // stdin
+  expectedOutput String  @db.Text // stdout
   explanation    String?
-  isHidden       Boolean @default(false)
+  isHidden       Boolean @default(false) // hidden = judge only, not shown to solver
   orderIndex     Int     @default(0)
-  problem        Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
 
   @@index([problemId])
 }
 
+// ══════════════════════════════════════════════
+//  SUBMISSION
+//  One row per Run or Submit click
+// ══════════════════════════════════════════════
 model Submission {
   id           String           @id @default(cuid())
   userId       String
   problemId    String
-  language     String
-  code         String
-  type         SubmissionType   @default(SUBMIT)
+  language     String // "python", "javascript", etc.
+  code         String           @db.Text
+  type         SubmissionType   @default(SUBMIT) // RUN = test only, SUBMIT = judge all
   status       SubmissionStatus
-  runtime      Float?
-  memory       Float?
-  errorMessage String?
+  runtime      Float? // ms
+  memory       Float? // MB
+  errorMessage String?          @db.Text
   submittedAt  DateTime         @default(now())
-  problem      Problem          @relation(fields: [problemId], references: [id])
-  user         User             @relation(fields: [userId], references: [id])
+
+  user    User    @relation(fields: [userId], references: [id])
+  problem Problem @relation(fields: [problemId], references: [id])
 
   @@index([userId])
   @@index([problemId])
-  @@index([userId, problemId])
+  @@index([userId, problemId]) // fast "has this user solved this problem" lookup
 }
 
+// ══════════════════════════════════════════════
+//  FOLLOW
+// ══════════════════════════════════════════════
 model Follow {
-  followerId  String
-  followingId String
+  followerId  String // the user doing the following
+  followingId String // the user being followed
   createdAt   DateTime @default(now())
-  follower    User     @relation("follower", fields: [followerId], references: [id])
-  following   User     @relation("following", fields: [followingId], references: [id])
+
+  follower  User @relation("follower", fields: [followerId], references: [id])
+  following User @relation("following", fields: [followingId], references: [id])
 
   @@id([followerId, followingId])
   @@index([followerId])
   @@index([followingId])
 }
 
+// ══════════════════════════════════════════════
+//  LIKE
+// ══════════════════════════════════════════════
 model Like {
   userId    String
   problemId String
   createdAt DateTime @default(now())
-  problem   Problem  @relation(fields: [problemId], references: [id], onDelete: Cascade)
-  user      User     @relation(fields: [userId], references: [id])
+
+  user    User    @relation(fields: [userId], references: [id])
+  problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
 
   @@id([userId, problemId])
 }
 
+// ══════════════════════════════════════════════
+//  COMMENT
+// ══════════════════════════════════════════════
 model Comment {
   id        String   @id @default(cuid())
   userId    String
   problemId String
-  body      String
+  body      String   @db.Text
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  problem   Problem  @relation(fields: [problemId], references: [id], onDelete: Cascade)
-  user      User     @relation(fields: [userId], references: [id])
+
+  user    User    @relation(fields: [userId], references: [id])
+  problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
 
   @@index([problemId])
 }
 
+// ══════════════════════════════════════════════
+//  NOTIFICATION
+//  Covers: new follower, like on your problem,
+//          comment on your problem, new submission result
+// ══════════════════════════════════════════════
 model Notification {
   id          String           @id @default(cuid())
   recipientId String
   type        NotificationType
   read        Boolean          @default(false)
+  // flexible payload: { actorId, problemId, commentId, etc. }
   payload     Json
   createdAt   DateTime         @default(now())
-  recipient   User             @relation("recipient", fields: [recipientId], references: [id])
+
+  recipient User @relation("recipient", fields: [recipientId], references: [id])
 
   @@index([recipientId, read])
   @@index([recipientId, createdAt])
 }
 
+// ══════════════════════════════════════════════
+//  SOLVED PROBLEM
+// ══════════════════════════════════════════════
 model SolvedProblem {
   userId      String
   problemId   String
   solvedAt    DateTime @default(now())
   bestRuntime Float?
   bestMemory  Float?
-  problem     Problem  @relation(fields: [problemId], references: [id])
-  user        User     @relation(fields: [userId], references: [id])
+
+  user    User    @relation(fields: [userId], references: [id])
+  problem Problem @relation(fields: [problemId], references: [id])
 
   @@id([userId, problemId])
   @@index([userId])
   @@index([problemId])
 }
 
+// ══════════════════════════════════════════════
+//  MESSAGING MODELS
+// ══════════════════════════════════════════════
+
 model Conversation {
-  id                 String                    @id @default(cuid())
-  createdAt          DateTime                  @default(now())
-  updatedAt          DateTime                  @updatedAt
-  lastMessageAt      DateTime?
-  lastMessagePreview String?
-  participants       ConversationParticipant[]
-  messages           Message[]
+  id            String    @id @default(cuid())
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  lastMessageAt DateTime?
+  lastMessagePreview String? // "Hey, check this problem..." — for sidebar
+
+  participants ConversationParticipant[]
+  messages     Message[]
 }
 
 model ConversationParticipant {
-  id             String       @id @default(cuid())
+  id             String   @id @default(cuid())
   conversationId String
   userId         String
-  unreadCount    Int          @default(0)
-  lastSeenAt     DateTime     @default(now())
-  joinedAt       DateTime     @default(now())
-  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-  user           User         @relation(fields: [userId], references: [id])
+  unreadCount    Int      @default(0)
+  lastSeenAt     DateTime @default(now())
+  joinedAt       DateTime @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id])
 
   @@unique([conversationId, userId])
   @@index([userId])
@@ -209,19 +273,23 @@ model Message {
   conversationId String
   senderId       String
   type           MessageType   @default(TEXT)
-  body           String?
-  problemId      String?
+  body           String?       @db.Text          // null for shared_post-only messages
+  problemId      String?                         // set when type = SHARED_POST
   status         MessageStatus @default(SENT)
   seenAt         DateTime?
   createdAt      DateTime      @default(now())
-  conversation   Conversation  @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-  problem        Problem?      @relation(fields: [problemId], references: [id])
-  sender         User          @relation(fields: [senderId], references: [id])
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender       User         @relation(fields: [senderId], references: [id])
+  problem      Problem?     @relation(fields: [problemId], references: [id], onDelete: SetNull)
 
   @@index([conversationId, createdAt])
   @@index([senderId])
 }
 
+// ══════════════════════════════════════════════
+//  ENUMS
+// ══════════════════════════════════════════════
 enum Difficulty {
   Easy
   Medium
