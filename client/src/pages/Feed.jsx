@@ -1,0 +1,316 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Heart, MessageCircle, Share2, Bookmark, Users } from 'lucide-react';
+import { useAuth } from '@clerk/react';
+import useCurrentUser from '../hooks/useCurrentUser';
+import CommentSection from '../components/CommentSection';
+import Loading from '../components/Loading';
+import ShareModal from '../components/ShareModal';
+
+// ─── helpers ────────────────────────────────────────────────
+const timeAgo = iso => {
+  const diff = Math.floor((Date.now() - new Date(iso)) / 1000);
+  if (diff < 60) return `${diff}s ago`;
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+  return `${Math.floor(diff / 86400)}d ago`;
+};
+
+const DIFFICULTY_CONFIG = {
+  Easy: { color: 'text-emerald-400', bg: 'bg-emerald-400/10 border-emerald-400/20', dot: 'bg-emerald-400' },
+  Medium: { color: 'text-amber-400', bg: 'bg-amber-400/10 border-amber-400/20', dot: 'bg-amber-400' },
+  Hard: { color: 'text-red-400', bg: 'bg-red-400/10 border-red-400/20', dot: 'bg-red-400' },
+};
+
+// ─── ProblemCard ─────────────────────────────────────────────
+const ProblemCard = ({ problem, index, getToken, solvedProblems = [], attemptedProblems = [] }) => {
+  if (!problem) return null;
+
+  const { user: dbUser } = useCurrentUser();
+  const navigate = useNavigate();
+
+  const [liked, setLiked] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [likeCount, setLikeCount] = useState(problem.likesCount || 0);
+  const [likeLoading, setLikeLoading] = useState(false);
+
+  const [showComments, setShowComments] = useState(false);
+  const [commentCount, setCommentCount] = useState(problem.commentsCount || 0);
+
+  const [shareOpen, setShareOpen] = useState(false);
+
+  const author = problem.author || {};
+
+  const isSolved = solvedProblems.some(p => p.id === problem.id);
+  const isAttempted = attemptedProblems.some(p => p.id === problem.id);
+
+  const diff = DIFFICULTY_CONFIG[problem.difficulty] || DIFFICULTY_CONFIG.Medium;
+  const solveRate = problem.totalAttempts > 0 ? Math.round((problem.successfulSolves / problem.totalAttempts) * 100) : 0;
+
+  const handleLike = async () => {
+    try {
+      setLikeLoading(true);
+      const token = await getToken();
+      const method = liked ? 'DELETE' : 'POST';
+
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/problems/${problem.id}/like`, {
+        method,
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        setLiked(data.liked);
+        setLikeCount(data.likesCount);
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLikeLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const fetchLikeStatus = async () => {
+      try {
+        const token = await getToken();
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/problems/${problem.id}/like-status`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        if (data.success) {
+          setLiked(data.liked);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchLikeStatus();
+  }, [problem.id, getToken]);
+
+  return (
+    <article
+      className='rounded-xl border border-white/8 bg-[#0d0d0d] p-5 transition-all duration-300 hover:border-red-500/25 hover:bg-[#111]'
+      style={{ animationDelay: `${index * 60}ms` }}
+    >
+      <div className='flex items-start justify-between gap-3'>
+        {/* Clickable group for Author Avatar + Name */}
+        <div 
+          onClick={() => author.username && navigate(`/profile/${author.username}`)}
+          className='flex items-center gap-3 cursor-pointer group/author'
+        >
+          <div className='relative'>
+            <img 
+              src={author.avatarUrl} 
+              alt={author.displayName} 
+              className='h-11 w-11 rounded-full object-cover ring-2 ring-white/10 transition-all duration-200 group-hover/author:opacity-80 group-hover/author:ring-red-500' 
+            />
+          </div>
+
+          <div>
+            <div className='flex items-center gap-2'>
+              <span className='text-sm font-semibold text-white transition-colors duration-200 group-hover/author:text-red-400'>
+                {author.displayName}
+              </span>
+              <span className='text-xs text-slate-500'>@{author.username}</span>
+            </div>
+            <span className='text-xs text-slate-600'>{timeAgo(problem.createdAt)}</span>
+          </div>
+        </div>
+
+        <div className='flex items-center gap-2'>
+          {isSolved && <span className='inline-flex rounded-full bg-green-500/10 px-2.5 py-0.5 text-xs font-semibold text-green-400'>Solved</span>}
+
+          {isAttempted && !isSolved && (
+            <span className='inline-flex rounded-full bg-yellow-500/10 px-2.5 py-0.5 text-xs font-semibold text-yellow-400'>Attempted</span>
+          )}
+
+          <span className={`flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium ${diff.bg} ${diff.color}`}>
+            <span className={`h-1.5 w-1.5 rounded-full ${diff.dot}`} />
+            {problem.difficulty}
+          </span>
+        </div>
+      </div>
+
+      {/* Clickable group for Problem Title */}
+      <div onClick={() => navigate(`/problem/${problem.id}`)} className='mt-4 hover:cursor-pointer group/title'>
+        <h2 className='text-lg font-bold leading-snug text-white transition-colors duration-200 group-hover/title:text-red-400'>
+          {problem.title}
+        </h2>
+        <p className='mt-2 text-sm leading-relaxed text-slate-400'>{problem.summary}</p>
+      </div>
+
+      <div className='mt-4 flex flex-wrap gap-1.5'>
+        {problem.tags?.map(tag => (
+          <span
+            key={tag}
+            className='rounded-md border border-white/8 bg-white/4 px-2.5 py-0.5 text-xs text-slate-400 transition-colors hover:border-red-500/30 hover:text-red-300'
+          >
+            #{tag}
+          </span>
+        ))}
+      </div>
+
+      <div className='mt-4 space-y-1.5'>
+        <div className='flex items-center justify-between text-xs text-slate-500'>
+          <span className='flex items-center gap-1'>
+            <Users size={11} />
+            {(problem.totalAttempts || 0).toLocaleString()} submissions
+          </span>
+          <span>{solveRate}% acceptance rate</span>
+        </div>
+
+        <div className='h-1 w-full overflow-hidden rounded-full bg-white/6'>
+          <div
+            className='h-full rounded-full bg-linear-to-r from-red-500 to-red-400 transition-all duration-700'
+            style={{ width: `${solveRate}%` }}
+          />
+        </div>
+      </div>
+
+      <div className='mt-4 border-t border-white/6 pt-4'>
+        <div className='flex items-center justify-between'>
+          <div className='flex items-center gap-5'>
+            <button
+              onClick={handleLike}
+              disabled={likeLoading}
+              className={`flex cursor-pointer items-center gap-1.5 text-sm transition-colors duration-150 disabled:opacity-50 ${
+                liked ? 'text-red-400' : 'text-slate-500 hover:text-red-400'
+              }`}
+            >
+              <Heart size={16} fill={liked ? 'currentColor' : 'none'} />
+              <span>{likeCount}</span>
+            </button>
+
+            <button
+              onClick={() => setShowComments(!showComments)}
+              className={`flex cursor-pointer items-center gap-1.5 text-sm transition-colors duration-150 ${
+                showComments ? 'text-sky-400' : 'text-slate-500 hover:text-sky-400'
+              }`}
+            >
+              <MessageCircle size={16} fill={showComments ? 'currentColor' : 'none'} />
+              <span>{commentCount}</span>
+            </button>
+
+            <button
+              onClick={() => setShareOpen(true)}
+              className='flex cursor-pointer items-center gap-1.5 text-sm text-slate-500 transition hover:text-green-400'
+            >
+              <Share2 size={16} />
+            </button>
+          </div>
+
+          <div className='flex items-center gap-2'>
+            <button
+              onClick={() => setSaved(v => !v)}
+              className={`cursor-pointer transition-colors duration-150 ${saved ? 'text-amber-400' : 'text-slate-500 hover:text-amber-400'}`}
+            >
+              <Bookmark size={16} fill={saved ? 'currentColor' : 'none'} />
+            </button>
+          </div>
+        </div>
+
+        {showComments && <CommentSection problemId={problem.id} currentUser={dbUser} compact={true} onUpdateCount={setCommentCount} />}
+      </div>
+
+      {shareOpen && <ShareModal problem={{ id: problem.id, title: problem.title, slug: problem.slug }} onClose={() => setShareOpen(false)} />}
+    </article>
+  );
+};
+
+// ─── Feed ────────────────────────────────────────────────────
+const Feed = () => {
+  const { getToken } = useAuth();
+  const { user: dbUser } = useCurrentUser();
+  const [activeTab, setActiveTab] = useState('forYou');
+
+  const [problems, setProblems] = useState([]);
+  const [solvedProblems, setSolvedProblems] = useState([]);
+  const [attemptedProblems, setAttemptedProblems] = useState([]);
+
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const token = await getToken();
+
+        // 1. Fetch Feed Problems
+        const feedRes = await fetch(`${import.meta.env.VITE_API_URL}/api/problems`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const feedData = await feedRes.json();
+        if (feedData.success) {
+          setProblems(feedData.problems);
+        }
+
+        // 2. Fetch User's Solved/Attempted Status
+        if (dbUser?.username) {
+          const userRes = await fetch(`${import.meta.env.VITE_API_URL}/api/users/${dbUser.username}/problems`, {
+            cache: 'no-store',
+          });
+          const userData = await userRes.json();
+          if (userData.success) {
+            setSolvedProblems(userData.solved || []);
+            setAttemptedProblems(userData.attempted || []);
+          }
+        }
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [dbUser?.username, getToken]);
+
+  const filteredProblems = activeTab === 'following' ? problems.filter(problem => problem.author?.isFollowing) : problems;
+
+  const tabs = [
+    { id: 'forYou', label: 'For You' },
+    { id: 'following', label: 'Following' },
+  ];
+
+  if (loading) {
+    return <Loading />;
+  }
+
+  return (
+    <div className='space-y-4'>
+      <div className='sticky top-0 z-20 flex items-center justify-around rounded-2xl border border-white/8 bg-[#090909]/90 p-2 backdrop-blur-xl'>
+        {tabs.map(tab => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`cursor-pointer rounded-xl mx-2 py-2 w-full text-sm font-medium transition-all duration-200 ${
+              activeTab === tab.id ? 'bg-red-500 text-white shadow-lg shadow-red-500/20' : 'text-slate-400 hover:bg-white/5 hover:text-white'
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {filteredProblems.length === 0 ? (
+        <div className='rounded-2xl border border-white/8 bg-black p-12 text-center'>
+          <p className='text-slate-500 text-sm'>No problems here yet.</p>
+        </div>
+      ) : (
+        filteredProblems.map((problem, i) => (
+          <ProblemCard
+            key={problem.id}
+            problem={problem}
+            index={i}
+            getToken={getToken}
+            solvedProblems={solvedProblems}
+            attemptedProblems={attemptedProblems}
+          />
+        ))
+      )}
+    </div>
+  );
+};
+
+export default Feed;

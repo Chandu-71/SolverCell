@@ -1,0 +1,48 @@
+# Node dependencies
+node_modules/
+
+# Vite / frontend build output
+client/dist/
+client/.vite/
+
+# Server build or runtime artifacts
+server/node_modules/
+server/.cache/
+
+# Prisma generated artifacts
+server/generated/
+
+# Environment variables
+.env
+.env.*
+client/.env
+client/.env.*
+server/.env
+server/.env.*
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor directories and files
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# Misc
+dist/
+coverage/
+.cache/
+*.tgz
+*.bak
+*.swp
