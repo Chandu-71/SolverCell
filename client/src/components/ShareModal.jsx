@@ -60,7 +60,7 @@ const UserRow = ({ user, selected, onClick }) => (
 );
 
 // ─── ShareModal ───────────────────────────────────────────────
-const ShareModal = ({ problem, onClose }) => {
+const ShareModal = ({ problem, onClose, onShared }) => {
   const { getToken } = useAuth();
   const { user: currentUser } = useCurrentUser();
 
@@ -178,9 +178,9 @@ const ShareModal = ({ problem, onClose }) => {
 
       // collect usernames from all selected users across both lists
       const allUsers = [...displayRow, ...searchResults];
-      const usernames = [...selectedIds].map(id => allUsers.find(u => u.id === id)?.username).filter(Boolean);
+      const usernames = [...new Set([...selectedIds].map(id => allUsers.find(u => u.id === id)?.username).filter(Boolean))];
 
-      await fetch(`${import.meta.env.VITE_API_URL}/api/messages/share-post`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/messages/share-post`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({
@@ -189,6 +189,12 @@ const ShareModal = ({ problem, onClose }) => {
           caption: caption.trim() || null,
         }),
       });
+
+      const data = await res.json();
+      const sharedCount = data.success ? data.results.filter(r => r.success).length : 0;
+      if (sharedCount > 0 && typeof onShared === 'function') {
+        onShared(sharedCount);
+      }
 
       setSent(true);
       setTimeout(onClose, 1400);

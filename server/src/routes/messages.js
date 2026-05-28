@@ -213,16 +213,19 @@ router.post(
     // targetUsernames: string[]
 
     if (!problemId) return res.status(400).json({ success: false, message: 'problemId required' });
-    if (!Array.isArray(targetUsernames) || targetUsernames.length === 0)
-      return res.status(400).json({ success: false, message: 'targetUsernames must be a non-empty array' });
-    if (targetUsernames.length > 10) return res.status(400).json({ success: false, message: 'Max 10 recipients at once' });
+
+    const cleanedUsernames = [...new Set((Array.isArray(targetUsernames) ? targetUsernames : []).map(username => username?.trim()).filter(Boolean))];
+
+    if (cleanedUsernames.length === 0) return res.status(400).json({ success: false, message: 'targetUsernames must be a non-empty array' });
+    if (cleanedUsernames.length > 10) return res.status(400).json({ success: false, message: 'Max 10 recipients at once' });
 
     const problem = await prisma.problem.findUnique({ where: { id: problemId } });
     if (!problem) return res.status(404).json({ success: false, message: 'Problem not found' });
 
     const results = [];
+    let successfulShareCount = 0;
 
-    for (const username of targetUsernames) {
+    for (const username of cleanedUsernames) {
       try {
         const target = await prisma.user.findUnique({ where: { username } });
         if (!target || target.id === me.id) continue;
@@ -311,6 +314,7 @@ router.post(
           lastMessageAt: new Date(),
         });
 
+        successfulShareCount += 1;
         results.push({ username, success: true, conversationId: conversation.id });
       } catch (err) {
         console.error(`Failed to share to ${username}:`, err);
@@ -318,7 +322,14 @@ router.post(
       }
     }
 
-    res.json({ success: true, results });
+    if (successfulShareCount > 0) {
+      await prisma.problem.update({
+        where: { id: problemId },
+        data: { sharesCount: { increment: successfulShareCount } },
+      });
+    }
+
+    res.json({ success: true, results, sharedCount: successfulShareCount });
   }),
 );
 

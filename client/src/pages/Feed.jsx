@@ -32,6 +32,7 @@ const ProblemCard = ({ problem, index, getToken, solvedProblems = [], attemptedP
   const [liked, setLiked] = useState(false);
   const [saved, setSaved] = useState(false);
   const [likeCount, setLikeCount] = useState(problem.likesCount || 0);
+  const [sharesCount, setSharesCount] = useState(problem.sharesCount || 0);
   const [likeLoading, setLikeLoading] = useState(false);
 
   const [showComments, setShowComments] = useState(false);
@@ -96,15 +97,15 @@ const ProblemCard = ({ problem, index, getToken, solvedProblems = [], attemptedP
     >
       <div className='flex items-start justify-between gap-3'>
         {/* Clickable group for Author Avatar + Name */}
-        <div 
+        <div
           onClick={() => author.username && navigate(`/profile/${author.username}`)}
           className='flex items-center gap-3 cursor-pointer group/author'
         >
           <div className='relative'>
-            <img 
-              src={author.avatarUrl} 
-              alt={author.displayName} 
-              className='h-11 w-11 rounded-full object-cover ring-2 ring-white/10 transition-all duration-200 group-hover/author:opacity-80 group-hover/author:ring-red-500' 
+            <img
+              src={author.avatarUrl}
+              alt={author.displayName}
+              className='h-11 w-11 rounded-full object-cover ring-2 ring-white/10 transition-all duration-200 group-hover/author:opacity-80 group-hover/author:ring-red-500'
             />
           </div>
 
@@ -135,9 +136,7 @@ const ProblemCard = ({ problem, index, getToken, solvedProblems = [], attemptedP
 
       {/* Clickable group for Problem Title */}
       <div onClick={() => navigate(`/problem/${problem.id}`)} className='mt-4 hover:cursor-pointer group/title'>
-        <h2 className='text-lg font-bold leading-snug text-white transition-colors duration-200 group-hover/title:text-red-400'>
-          {problem.title}
-        </h2>
+        <h2 className='text-lg font-bold leading-snug text-white transition-colors duration-200 group-hover/title:text-red-400'>{problem.title}</h2>
         <p className='mt-2 text-sm leading-relaxed text-slate-400'>{problem.summary}</p>
       </div>
 
@@ -198,6 +197,7 @@ const ProblemCard = ({ problem, index, getToken, solvedProblems = [], attemptedP
               className='flex cursor-pointer items-center gap-1.5 text-sm text-slate-500 transition hover:text-green-400'
             >
               <Share2 size={16} />
+              <span>{sharesCount}</span>
             </button>
           </div>
 
@@ -214,7 +214,13 @@ const ProblemCard = ({ problem, index, getToken, solvedProblems = [], attemptedP
         {showComments && <CommentSection problemId={problem.id} currentUser={dbUser} compact={true} onUpdateCount={setCommentCount} />}
       </div>
 
-      {shareOpen && <ShareModal problem={{ id: problem.id, title: problem.title, slug: problem.slug }} onClose={() => setShareOpen(false)} />}
+      {shareOpen && (
+        <ShareModal
+          problem={{ id: problem.id, title: problem.title, slug: problem.slug }}
+          onClose={() => setShareOpen(false)}
+          onShared={count => setSharesCount(prev => prev + count)}
+        />
+      )}
     </article>
   );
 };

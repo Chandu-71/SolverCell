@@ -80,6 +80,7 @@ router.get(
       createdAt: problem.createdAt,
 
       likesCount: problem.likesCount,
+      sharesCount: problem.sharesCount,
       totalAttempts: problem.totalAttempts,
       successfulSolves: problem.successfulSolves,
       commentsCount: problem.commentsCount,
@@ -477,6 +478,7 @@ router.get(
         createdAt: problem.createdAt,
 
         likesCount: problem.likesCount,
+        sharesCount: problem.sharesCount,
         totalAttempts: problem.totalAttempts,
         successfulSolves: problem.successfulSolves,
         commentsCount: problem.commentsCount,

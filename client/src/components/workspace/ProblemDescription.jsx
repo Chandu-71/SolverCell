@@ -22,6 +22,7 @@ const ProblemDescription = ({ problem }) => {
 
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(problem.likesCount);
+  const [sharesCount, setSharesCount] = useState(problem.sharesCount || 0);
   const [likeLoading, setLikeLoading] = useState(false);
 
   // Comment state
@@ -199,7 +200,7 @@ const ProblemDescription = ({ problem }) => {
               className='flex items-center gap-2 text-sm text-slate-400 cursor-pointer hover:text-green-400 transition'
             >
               <Share2 className='h-4 w-4' />
-              <span>Share</span>
+              <span>{sharesCount}</span>
             </button>
 
             {/* ACCEPTED COUNT */}
@@ -227,7 +228,13 @@ const ProblemDescription = ({ problem }) => {
       </div>
 
       {/* SHARE MODAL RENDERED OUTSIDE SCROLLABLE CONTAINER */}
-      {shareOpen && <ShareModal problem={{ id: problem.id, title: problem.title, slug: problem.slug }} onClose={() => setShareOpen(false)} />}
+      {shareOpen && (
+        <ShareModal
+          problem={{ id: problem.id, title: problem.title, slug: problem.slug }}
+          onClose={() => setShareOpen(false)}
+          onShared={count => setSharesCount(prev => prev + count)}
+        />
+      )}
     </>
   );
 };

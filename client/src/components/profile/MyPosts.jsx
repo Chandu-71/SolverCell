@@ -34,6 +34,13 @@ const MyPosts = ({ profile }) => {
   const [loading, setLoading] = useState(true);
   const [shareProblem, setShareProblem] = useState(null); // Tracks which problem to share
 
+  const updateProblemShares = (problemId, delta) => {
+    const updateList = list => list.map(item => (item.id === problemId ? { ...item, sharesCount: (item.sharesCount || 0) + delta } : item));
+    setPosts(prev => updateList(prev));
+    setSolvedProblems(prev => updateList(prev));
+    setAttemptedProblems(prev => updateList(prev));
+  };
+
   // fetch real posts and problem data
   useEffect(() => {
     const fetchPosts = async () => {
@@ -119,15 +126,15 @@ const MyPosts = ({ profile }) => {
                 {/* Author Info & Badges Header */}
                 <div className='flex items-start justify-between gap-3'>
                   {/* Clickable group for Author Avatar + Name */}
-                  <div 
+                  <div
                     onClick={() => author.username && navigate(`/profile/${author.username}`)}
                     className='flex items-center gap-3 cursor-pointer group/author'
                   >
                     <div className='relative'>
-                      <img 
-                        src={author.avatarUrl || '/default-avatar.png'} 
-                        alt={author.displayName || 'User'} 
-                        className='h-11 w-11 rounded-full object-cover ring-2 ring-white/10 transition-all duration-200 group-hover/author:opacity-80 group-hover/author:ring-red-500' 
+                      <img
+                        src={author.avatarUrl || '/default-avatar.png'}
+                        alt={author.displayName || 'User'}
+                        className='h-11 w-11 rounded-full object-cover ring-2 ring-white/10 transition-all duration-200 group-hover/author:opacity-80 group-hover/author:ring-red-500'
                       />
                     </div>
 
@@ -144,7 +151,9 @@ const MyPosts = ({ profile }) => {
 
                   <div className='flex items-center gap-2'>
                     {/* Status badges only show in 'posts' tab now, hiding them in solved/attempted tabs */}
-                    {isSolved && <span className='inline-flex rounded-full bg-green-500/10 px-2.5 py-0.5 text-xs font-semibold text-green-400'>Solved</span>}
+                    {isSolved && (
+                      <span className='inline-flex rounded-full bg-green-500/10 px-2.5 py-0.5 text-xs font-semibold text-green-400'>Solved</span>
+                    )}
 
                     {isAttempted && !isSolved && (
                       <span className='inline-flex rounded-full bg-yellow-500/10 px-2.5 py-0.5 text-xs font-semibold text-yellow-400'>Attempted</span>
@@ -222,6 +231,7 @@ const MyPosts = ({ profile }) => {
                       className='flex cursor-pointer items-center gap-1.5 text-sm text-slate-500 transition hover:text-green-400'
                     >
                       <Share2 size={16} />
+                      <span>{problem.sharesCount || 0}</span>
                     </button>
                   </div>
                 </div>
@@ -233,9 +243,12 @@ const MyPosts = ({ profile }) => {
 
       {/* Share Modal */}
       {shareProblem && (
-        <ShareModal 
-          problem={{ id: shareProblem.id, title: shareProblem.title, slug: shareProblem.slug }} 
-          onClose={() => setShareProblem(null)} 
+        <ShareModal
+          problem={{ id: shareProblem.id, title: shareProblem.title, slug: shareProblem.slug }}
+          onClose={() => setShareProblem(null)}
+          onShared={count => {
+            updateProblemShares(shareProblem.id, count);
+          }}
         />
       )}
     </div>

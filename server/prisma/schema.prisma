@@ -71,6 +71,7 @@ model Problem {
   totalAttempts    Int @default(0)
   successfulSolves Int @default(0)
   commentsCount    Int @default(0)
+  sharesCount      Int @default(0)
 
   // relations
   author      User            @relation(fields: [authorId], references: [id])
