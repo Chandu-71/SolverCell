@@ -136,26 +136,13 @@ const LangDropdown = ({ selected, onChange }) => {
   );
 };
 
-// StarterCode
-const getInitialCode = (problem, language) => {
-  if (!problem?.starterCode) {
-    return BOILERPLATE[language];
-  }
-
-  if (problem.starterCode[language]) {
-    return problem.starterCode[language];
-  }
-
-  return BOILERPLATE[language];
-};
-
 const getDraftKey = (problemId, language) => `draft_code_${problemId}_${language}`;
 
 const loadDraftCode = (problem, language) => {
-  if (!problem?.id) return getInitialCode(problem, language);
+  if (!problem?.id) return BOILERPLATE[language];
 
   const draft = localStorage.getItem(getDraftKey(problem.id, language));
-  return draft !== null ? draft : getInitialCode(problem, language);
+  return draft !== null ? draft : BOILERPLATE[language];
 };
 
 // ─── CodeEditorPanel ─────────────────────────────────────────
@@ -166,7 +153,7 @@ const CodeEditorPanel = ({ problem, onCodeChange }) => {
     const initial = {};
 
     LANGUAGES.forEach(lang => {
-      initial[lang.id] = getInitialCode(problem, lang.id);
+      initial[lang.id] = BOILERPLATE[lang.id];
     });
 
     return initial;
@@ -203,7 +190,7 @@ const CodeEditorPanel = ({ problem, onCodeChange }) => {
   };
 
   const handleReset = () => {
-    const fresh = getInitialCode(problem, language);
+    const fresh = BOILERPLATE[language];
 
     setCodeByLanguage(prev => {
       const next = {

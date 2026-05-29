@@ -28,7 +28,7 @@ const PREVIEW_PROSE =
   'prose-pre:bg-[#0b0b0b] prose-pre:text-slate-200 ' +
   'prose-blockquote:border-red-500/20 prose-blockquote:text-slate-400';
 
-const DescriptionSection = ({ description, setDescription, constraints, setConstraints, starterCode, setStarterCode, errors }) => {
+const DescriptionSection = ({ description, setDescription, constraints, setConstraints, errors }) => {
   const [activeTab, setActiveTab] = useState('edit');
 
   return (
@@ -94,18 +94,6 @@ const DescriptionSection = ({ description, setDescription, constraints, setConst
           placeholder={'- 1 ≤ nums.length ≤ 10⁴\n- -10⁹ ≤ nums[i] ≤ 10⁹\n- Time limit: 2 seconds'}
           className={`${inputCls} resize-none font-mono text-sm`}
         />
-      </Section>
-
-      {/* ── SECTION 5: STARTER CODE ── */}
-      <Section number='5' title='Starter code' subtitle='Optional — provide a function signature so solvers know what to implement.'>
-        <textarea
-          value={starterCode}
-          onChange={e => setStarterCode(e.target.value)}
-          rows={5}
-          placeholder={'def twoSum(nums: list[int], target: int) -> list[int]:\n    pass'}
-          className={`${inputCls} resize-none font-mono text-sm`}
-        />
-        <p className='mt-2 text-xs text-slate-600'>Leave blank for open-ended problems (math, aptitude, general programming).</p>
       </Section>
     </>
   );

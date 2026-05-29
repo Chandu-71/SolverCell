@@ -61,7 +61,6 @@ model Problem {
   description String     @db.Text // full markdown
   difficulty  Difficulty
   constraints String?    @db.Text
-  starterCode Json? // { python: "...", javascript: "..." }
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 
@@ -119,7 +118,6 @@ model TestCase {
   label          String? // "Case 1", "Case 2"
   input          String  @db.Text // stdin
   expectedOutput String  @db.Text // stdout
-  explanation    String?
   isHidden       Boolean @default(false) // hidden = judge only, not shown to solver
   orderIndex     Int     @default(0)
 

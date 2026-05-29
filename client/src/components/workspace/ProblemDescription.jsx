@@ -155,6 +155,14 @@ const ProblemDescription = ({ problem }) => {
           </div>
         </div>
 
+        {problem.constraints && (
+          <div className='px-6 pb-6'>
+            <h2 className='mb-3 text-lg font-semibold text-white'>Constraints</h2>
+
+            <pre className='overflow-x-auto rounded-xl border border-white/8 bg-[#111] p-4 text-sm text-slate-300'>{problem.constraints}</pre>
+          </div>
+        )}
+
         {/* FOOTER: TAGS, METRICS & ACTIONS */}
         <div className='border-t border-white/6 p-6 mt-auto bg-[#0a0a0a]'>
           {/* PROBLEM TAGS */}

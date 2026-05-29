@@ -125,7 +125,7 @@ router.post(
       });
     }
 
-    const { title, slug, summary, description, difficulty, tags, constraints, starterCode, testCases, hiddenTestCases } = req.body;
+    const { title, slug, summary, description, difficulty, tags, constraints, testCases, hiddenTestCases } = req.body;
 
     const existingProblem = await prisma.problem.findUnique({
       where: { slug },
@@ -147,7 +147,6 @@ router.post(
         description,
         difficulty,
         constraints,
-        starterCode,
 
         tags: {
           create: await Promise.all(
@@ -175,7 +174,6 @@ router.post(
               label: tc.label || `Case ${i + 1}`,
               input: tc.input,
               expectedOutput: tc.expectedOutput,
-              explanation: tc.explanation || null,
               isHidden: false,
               orderIndex: i,
             })),
@@ -184,7 +182,6 @@ router.post(
               label: `Hidden ${i + 1}`,
               input: tc.input,
               expectedOutput: tc.expectedOutput,
-              explanation: null,
               isHidden: true,
               orderIndex: testCases.length + i,
             })),
@@ -474,7 +471,6 @@ router.get(
         description: problem.description,
         difficulty: problem.difficulty,
         constraints: problem.constraints,
-        starterCode: problem.starterCode,
         createdAt: problem.createdAt,
 
         likesCount: problem.likesCount,

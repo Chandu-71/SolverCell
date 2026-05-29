@@ -59,7 +59,7 @@ const TestCasesSection = ({ visibleTCs, setVisibleTCs, hiddenTCs, setHiddenTCs, 
 
   return (
     <Section
-      number='6'
+      number='5'
       title='Test cases'
       subtitle='Visible cases are shown to the solver. Hidden ones are used for judging only.'
       error={errors.testcases}
