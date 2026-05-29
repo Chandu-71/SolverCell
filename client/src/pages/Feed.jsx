@@ -30,13 +30,14 @@ const ProblemCard = ({ problem, index, getToken, solvedProblems = [], attemptedP
   const navigate = useNavigate();
 
   const [liked, setLiked] = useState(false);
-  const [saved, setSaved] = useState(false);
   const [likeCount, setLikeCount] = useState(problem.likesCount || 0);
   const [sharesCount, setSharesCount] = useState(problem.sharesCount || 0);
   const [likeLoading, setLikeLoading] = useState(false);
 
   const [showComments, setShowComments] = useState(false);
   const [commentCount, setCommentCount] = useState(problem.commentsCount || 0);
+  const [saved, setSaved] = useState(false);
+  const [saveLoading, setSaveLoading] = useState(false);
 
   const [shareOpen, setShareOpen] = useState(false);
 
@@ -89,6 +90,45 @@ const ProblemCard = ({ problem, index, getToken, solvedProblems = [], attemptedP
     };
     fetchLikeStatus();
   }, [problem.id, getToken]);
+
+  useEffect(() => {
+    const fetchSaveStatus = async () => {
+      try {
+        const token = await getToken();
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/problems/${problem.id}/save-status`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        if (data.success) {
+          setSaved(data.saved);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchSaveStatus();
+  }, [problem.id, getToken]);
+
+  const handleSave = async () => {
+    try {
+      setSaveLoading(true);
+      const token = await getToken();
+      const method = saved ? 'DELETE' : 'POST';
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/problems/${problem.id}/save`, {
+        method,
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSaved(data.saved);
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setSaveLoading(false);
+    }
+  };
 
   return (
     <article
@@ -203,8 +243,9 @@ const ProblemCard = ({ problem, index, getToken, solvedProblems = [], attemptedP
 
           <div className='flex items-center gap-2'>
             <button
-              onClick={() => setSaved(v => !v)}
-              className={`cursor-pointer transition-colors duration-150 ${saved ? 'text-amber-400' : 'text-slate-500 hover:text-amber-400'}`}
+              onClick={handleSave}
+              disabled={saveLoading}
+              className={`cursor-pointer transition-colors duration-150 disabled:opacity-50 ${saved ? 'text-amber-400' : 'text-slate-500 hover:text-amber-400'}`}
             >
               <Bookmark size={16} fill={saved ? 'currentColor' : 'none'} />
             </button>

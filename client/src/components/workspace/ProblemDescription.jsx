@@ -8,7 +8,7 @@ import useCurrentUser from '../../hooks/useCurrentUser';
 import CommentSection from '../CommentSection';
 import ShareModal from '../ShareModal';
 
-import { Heart, CheckCircle2, CircleDot, MessageCircle, Share2 } from 'lucide-react';
+import { Heart, CheckCircle2, CircleDot, MessageCircle, Share2, Bookmark } from 'lucide-react';
 
 const difficultyStyles = {
   Easy: 'bg-green-500/10 text-green-400',
@@ -24,6 +24,8 @@ const ProblemDescription = ({ problem }) => {
   const [likeCount, setLikeCount] = useState(problem.likesCount);
   const [sharesCount, setSharesCount] = useState(problem.sharesCount || 0);
   const [likeLoading, setLikeLoading] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [saveLoading, setSaveLoading] = useState(false);
 
   // Comment state
   const [showComments, setShowComments] = useState(false);
@@ -108,8 +110,28 @@ const ProblemDescription = ({ problem }) => {
       }
     };
 
+    const fetchSaveStatus = async () => {
+      try {
+        const token = await getToken();
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/problems/${problem.id}/save-status`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+          setSaved(data.saved);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
     fetchLikeStatus();
-  }, [problem.id]);
+    fetchSaveStatus();
+  }, [problem.id, getToken]);
 
   return (
     <>
@@ -209,6 +231,34 @@ const ProblemDescription = ({ problem }) => {
             >
               <Share2 className='h-4 w-4' />
               <span>{sharesCount}</span>
+            </button>
+
+            <button
+              onClick={async () => {
+                try {
+                  setSaveLoading(true);
+                  const token = await getToken();
+                  const method = saved ? 'DELETE' : 'POST';
+                  const res = await fetch(`${import.meta.env.VITE_API_URL}/api/problems/${problem.id}/save`, {
+                    method,
+                    headers: {
+                      Authorization: `Bearer ${token}`,
+                    },
+                  });
+                  const data = await res.json();
+                  if (data.success) {
+                    setSaved(data.saved);
+                  }
+                } catch (error) {
+                  console.error(error);
+                } finally {
+                  setSaveLoading(false);
+                }
+              }}
+              disabled={saveLoading}
+              className={`flex items-center gap-2 text-sm cursor-pointer transition-colors duration-150 disabled:opacity-50 ${saved ? 'text-amber-400' : 'text-slate-400 hover:text-amber-400'}`}
+            >
+              <Bookmark className='h-4 w-4' fill={saved ? 'currentColor' : 'none'} />
             </button>
 
             {/* ACCEPTED COUNT */}

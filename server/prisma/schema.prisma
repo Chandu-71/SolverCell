@@ -41,6 +41,7 @@ model User {
   comments       Comment[]
   notifications  Notification[]  @relation("recipient")
   solvedProblems SolvedProblem[]
+  bookmarks      Bookmark[]
   conversations ConversationParticipant[]
   sentMessages  Message[]
 
@@ -80,6 +81,7 @@ model Problem {
   likes       Like[]
   comments    Comment[]
   solvedBy    SolvedProblem[]
+  bookmarks   Bookmark[]
   sharedInMessages Message[]
 
   @@index([authorId])
@@ -105,6 +107,18 @@ model ProblemTag {
   tag       Tag     @relation(fields: [tagId], references: [id])
 
   @@id([problemId, tagId])
+}
+
+model Bookmark {
+  userId    String
+  problemId String
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  @@id([userId, problemId])
+  @@index([problemId])
 }
 
 // ══════════════════════════════════════════════

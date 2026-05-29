@@ -232,6 +232,65 @@ router.get(
 );
 
 router.get(
+  '/me/bookmarks',
+  asyncHandler(async (req, res) => {
+    const { userId } = getAuth(req);
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: 'Unauthorized',
+      });
+    }
+
+    const dbUser = await prisma.user.findUnique({
+      where: { clerkId: userId },
+    });
+
+    if (!dbUser) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found',
+      });
+    }
+
+    const bookmarks = await prisma.bookmark.findMany({
+      where: { userId: dbUser.id },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        problem: {
+          include: {
+            author: {
+              select: {
+                id: true,
+                username: true,
+                displayName: true,
+                avatarUrl: true,
+              },
+            },
+            tags: {
+              include: {
+                tag: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const problems = bookmarks.map(bookmark => ({
+      ...bookmark.problem,
+      tags: bookmark.problem.tags.map(pt => pt.tag.name),
+    }));
+
+    res.status(200).json({
+      success: true,
+      problems,
+    });
+  }),
+);
+
+router.get(
   '/:username/follow-data',
   asyncHandler(async (req, res) => {
     const { username } = req.params;
