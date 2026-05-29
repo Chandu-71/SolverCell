@@ -173,6 +173,16 @@ const MyPosts = ({ profile }) => {
       }
     };
 
+    const author =
+      isOwnProfile && problem.author.id === profile.id
+        ? {
+            ...problem.author,
+            avatarUrl: profile.avatarUrl,
+            displayName: profile.displayName,
+            username: profile.username,
+          }
+        : problem.author;
+
     return (
       <article
         key={problem.id}
@@ -183,13 +193,13 @@ const MyPosts = ({ profile }) => {
         <div className='flex items-start justify-between gap-3'>
           {/* Clickable group for Author Avatar + Name */}
           <div
-            onClick={() => problem.author?.username && navigate(`/profile/${problem.author.username}`)}
+            onClick={() => author.username && navigate(`/profile/${author.username}`)}
             className='flex items-center gap-3 cursor-pointer group/author'
           >
             <div className='relative'>
               <img
-                src={problem.author?.avatarUrl || '/default-avatar.png'}
-                alt={problem.author?.displayName || 'User'}
+                src={problem.author.id === profile.id ? profile.avatarUrl : problem.author.avatarUrl}
+                alt={author.displayName || 'User'}
                 className='h-11 w-11 rounded-full object-cover ring-2 ring-white/10 transition-all duration-200 group-hover/author:opacity-80 group-hover/author:ring-red-500'
               />
             </div>
@@ -197,9 +207,9 @@ const MyPosts = ({ profile }) => {
             <div>
               <div className='flex items-center gap-2'>
                 <span className='text-sm font-semibold text-white transition-colors duration-200 group-hover/author:text-red-400'>
-                  {problem.author?.displayName || 'Unknown User'}
+                  {author.displayName || 'Unknown User'}
                 </span>
-                <span className='text-xs text-slate-500'>@{problem.author?.username || 'unknown'}</span>
+                <span className='text-xs text-slate-500'>@{author.username || 'unknown'}</span>
               </div>
               <span className='text-xs text-slate-600'>{timeAgo(problem.createdAt)}</span>
             </div>

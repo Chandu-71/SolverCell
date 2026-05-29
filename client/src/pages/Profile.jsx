@@ -52,7 +52,7 @@ const Profile = () => {
     } else if (!username && dbUser) {
       setProfile({
         ...dbUser,
-        avatarUrl: clerkUser?.imageUrl ?? dbUser.avatarUrl,
+        avatarUrl: dbUser.avatarUrl || clerkUser?.imageUrl,
       });
     }
   }, [username, publicUser, dbUser, clerkUser]);
@@ -148,8 +148,12 @@ const Profile = () => {
   }, [openUserProfile]);
 
   // ── Handlers ──────────────────────────────────────────────────
-  const handleProfileSave = updatedUser => {
+  const handleProfileSave = async updatedUser => {
     setProfile(updatedUser);
+
+    setTimeout(() => {
+      window.location.reload();
+    }, 500);
   };
 
   const handleFollowToggle = async () => {

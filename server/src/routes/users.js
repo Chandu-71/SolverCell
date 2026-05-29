@@ -33,6 +33,15 @@ router.post(
           avatarUrl,
         },
       });
+    } else {
+      user = await prisma.user.update({
+        where: { clerkId: userId },
+        data: {
+          email,
+          displayName,
+          ...(avatarUrl ? { avatarUrl } : {}),
+        },
+      });
     }
 
     res.json({
@@ -76,48 +85,31 @@ router.patch(
   '/me',
   asyncHandler(async (req, res) => {
     const { userId } = getAuth(req);
+    if (!userId) return res.status(401).json({ success: false, message: 'Unauthorized' });
 
-    if (!userId) {
-      return res.status(401).json({
-        success: false,
-        message: 'Unauthorized',
-      });
-    }
-
-    const { displayName, bio, location, username } = req.body;
+    const { displayName, bio, location, username, avatarUrl } = req.body;
 
     const existingUser = await prisma.user.findFirst({
-      where: {
-        username,
-        NOT: {
-          clerkId: userId,
-        },
-      },
+      where: { username, NOT: { clerkId: userId } },
     });
 
     if (existingUser) {
-      return res.status(400).json({
-        success: false,
-        message: 'Username already taken',
-      });
+      return res.status(400).json({ success: false, message: 'Username already taken' });
     }
 
     const updatedUser = await prisma.user.update({
-      where: {
-        clerkId: userId,
-      },
+      where: { clerkId: userId },
       data: {
         displayName,
         bio,
         location,
         username,
+        // only update avatarUrl if one was provided (Clerk upload succeeded)
+        ...(avatarUrl ? { avatarUrl } : {}),
       },
     });
 
-    res.json({
-      success: true,
-      user: updatedUser,
-    });
+    res.json({ success: true, user: updatedUser });
   }),
 );
 

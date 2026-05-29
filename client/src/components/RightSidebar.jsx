@@ -1,6 +1,7 @@
 import ProfileCard from './ProfileCard';
 import StreakCard from './StreakCard';
 import TrendingProblems from './TrendingProblems';
+import useCurrentUser   from '../hooks/useCurrentUser';
 
 // Derive trending problems from PROBLEMS data:
 // sort by solve count descending, take top 4, add a dummy trend %
@@ -13,9 +14,13 @@ const trendingProblems = []
   }));
 
 const RightSidebar = () => {
+  const { user } = useCurrentUser();
+
+  if (!user) return null;
+
   return (
     <aside className='sticky top-6 space-y-3'>
-      <ProfileCard />
+      <ProfileCard user={user} />
       <StreakCard stats={{ currentStreak: 0, longestStreak: 0, dailyActivity: [1, 0, 1, 1, 0, 1, 1] }} />
       <TrendingProblems problems={trendingProblems} />
     </aside>

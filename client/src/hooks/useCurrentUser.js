@@ -1,5 +1,5 @@
 import { useAuth } from '@clerk/react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 
 const useCurrentUser = () => {
   const { getToken } = useAuth();
@@ -7,26 +7,28 @@ const useCurrentUser = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchUser = async () => {
+  // useCallback so the function reference is stable — safe to put in useEffect deps
+  const fetchUser = useCallback(async () => {
+    try {
       const token = await getToken();
-
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/users/me`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
-
       const data = await res.json();
-
-      setUser(data.user);
+      if (data.success) setUser(data.user);
+    } catch (err) {
+      console.error('useCurrentUser fetch error:', err);
+    } finally {
       setLoading(false);
-    };
-
-    fetchUser();
+    }
   }, [getToken]);
 
-  return { user, loading };
+  useEffect(() => {
+    fetchUser();
+  }, [fetchUser]);
+
+  // refetch is the same stable function — call it after any profile save
+  return { user, loading, refetch: fetchUser };
 };
 
 export default useCurrentUser;

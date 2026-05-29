@@ -19,7 +19,7 @@ const ProfileCard = () => {
   const { user: dbUser, loading: isDbLoading } = useCurrentUser();
 
   // ── Derive data from Clerk and Backend (matching schema.prisma) ──
-  const imageUrl = dbUser?.avatarUrl || clerkUser?.imageUrl;
+  const imageUrl = dbUser?.avatarUrl || clerkUser?.imageUrl || '/default-avatar.png';
   const displayName = dbUser?.displayName || clerkUser?.fullName || 'Anonymous';
   const username = dbUser?.username || 'user';
 
