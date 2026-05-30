@@ -3,6 +3,7 @@ import asyncHandler from '../middleware/asyncHandler.js';
 import prisma from '../lib/prisma.js';
 import { getAuth } from '../middleware/auth.js';
 import { notify } from '../lib/notify.js';
+import { handleFirstSolve } from '../lib/solveRewards.js';
 
 const router = express.Router();
 
@@ -181,7 +182,7 @@ router.post(
       },
     });
 
-    // increment attempts
+    // increment attempts (runs on every SUBMIT regardless of verdict)
     await prisma.problem.update({
       where: { id: problemId },
       data: {
@@ -193,40 +194,18 @@ router.post(
 
     // if accepted
     if (finalStatus === 'ACCEPTED') {
-      // always increment successfulSolves for every accepted submission
-      await prisma.problem.update({
-        where: { id: problemId },
-        data: {
-          successfulSolves: {
-            increment: 1,
-          },
-        },
+      // Award ELO + update streak
+      const rewards = await handleFirstSolve({
+        userId: dbUser.id,
+        problemId: problemId,
+        runtime: finalRuntime,
+        memory: finalMemory,
       });
 
-      // track first solve per user for SolvedProblem table
-      const alreadySolved = await prisma.solvedProblem.findUnique({
-        where: {
-          userId_problemId: {
-            userId: dbUser.id,
-            problemId,
-          },
-        },
-      });
-
-      if (!alreadySolved) {
-        await prisma.solvedProblem.create({
-          data: {
-            userId: dbUser.id,
-            problemId,
-            bestRuntime: finalRuntime,
-            bestMemory: finalMemory,
-          },
-        });
-
-        // notify problem author
+      // if it's the user's first time solving it, notify the author
+      if (!rewards.alreadySolved) {
         const problem = await prisma.problem.findUnique({
           where: { id: problemId },
-
           include: {
             author: {
               select: {
@@ -239,18 +218,14 @@ router.post(
         if (problem?.author?.id !== dbUser.id) {
           await notify({
             recipientId: problem.author.id,
-
             type: 'PROBLEM_SOLVED',
-
             payload: {
               actorId: dbUser.id,
               actorUsername: dbUser.username,
               actorDisplayName: dbUser.displayName,
               actorAvatarUrl: dbUser.avatarUrl,
-
               problemId,
               problemTitle: problem.title,
-
               runtime: finalRuntime,
               memory: finalMemory,
               language,
@@ -258,9 +233,23 @@ router.post(
           });
         }
       }
+
+      // Return early with rewards payload for frontend
+      return res.json({
+        success: true,
+        status: finalStatus, // 'ACCEPTED'
+        language,
+        runtime: finalRuntime,
+        memory: finalMemory,
+        rewards: {
+          eloGained: rewards.eloGained,
+          alreadySolved: rewards.alreadySolved,
+          newStreak: rewards.newStreak,
+        },
+      });
     }
 
-    // Return response with complete information
+    // Return response for non-ACCEPTED status
     const response = {
       success: true,
       status: finalStatus,

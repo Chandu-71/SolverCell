@@ -29,7 +29,7 @@ CREATE TABLE "User" (
     "clerkId" TEXT NOT NULL,
     "currentStreak" INTEGER NOT NULL DEFAULT 0,
     "displayName" TEXT NOT NULL,
-    "eloRating" INTEGER NOT NULL DEFAULT 1000,
+    "eloRating" INTEGER NOT NULL DEFAULT 0,
     "email" TEXT NOT NULL,
     "joinedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "lastSolvedAt" TIMESTAMP(3),

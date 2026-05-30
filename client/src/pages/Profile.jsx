@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Heart, MapPin, CalendarDays, Trophy, CircleCheckBig, Target } from 'lucide-react';
+import { Heart, MapPin, CalendarDays, Trophy, CircleCheckBig, Target, Flame } from 'lucide-react';
 import { useUser, useClerk, useAuth } from '@clerk/react';
 import useCurrentUser from '../hooks/useCurrentUser';
 import Loading from '../components/Loading';
@@ -9,6 +9,15 @@ import LeftSidebar from '../components/LeftSidebar';
 import FollowModal from '../components/profile/FollowModal';
 import EditProfileModal from '../components/profile/EditProfileModal';
 import MyPosts from '../components/profile/MyPosts';
+
+// ── Helper: ELO Rank Label ────────────────────────────────────
+const getRankLabel = elo => {
+  if (elo >= 10000) return 'Grandmaster';
+  if (elo >= 5000) return 'Master';
+  if (elo >= 1500) return 'Solver';
+  if (elo >= 150) return 'Explorer';
+  return 'Novice';
+};
 
 const Profile = () => {
   const { user: clerkUser } = useUser();
@@ -182,17 +191,37 @@ const Profile = () => {
   }
 
   // ── Widget Configuration ──────────────────────────────────────
+  const eloRating = profile.eloRating ?? 0;
+
   const statsWidgets = [
-    { label: 'Elo', value: `#${profile.eloRating || '1000'}`, icon: Trophy, color: 'text-yellow-400' },
+    {
+      label: 'ELO',
+      value: eloRating,
+      subtext: `Rank: ${getRankLabel(eloRating)}`, // Added Rank subtext
+      icon: Trophy,
+      color: 'text-yellow-400',
+    },
     {
       label: 'Problems Solved',
       value: solvedCount,
-      subtext: `out of ${solvedCount + attemptedCount} attempted`, // <-- New!
+      subtext: `${solvedCount + attemptedCount} attempted`,
       icon: CircleCheckBig,
       color: 'text-green-400',
     },
-    { label: 'Success', value: `${solvedCount}/${solvedCount + attemptedCount} (${successRate}%)`, icon: Target, color: 'text-blue-400' },
-    { label: 'Likes', value: likesCount, icon: Heart, color: 'text-rose-400' },
+    {
+      label: 'Current Streak',
+      value: `${profile.currentStreak ?? 0} days`,
+      subtext: `Best: ${profile.longestStreak ?? 0} days`,
+      icon: Flame,
+      color: 'text-rose-400',
+    },
+    {
+      label: 'Likes',
+      value: likesCount,
+      subtext: 'Total received', // Added Likes subtext
+      icon: Heart,
+      color: 'text-rose-400',
+    },
   ];
 
   return (
@@ -298,13 +327,14 @@ const Profile = () => {
                   return (
                     <div
                       key={idx}
-                      className='rounded-xl border border-white/5 bg-[#0b0b0b] p-3 transition hover:border-red-500/10 hover:bg-[#101010]'
+                      className='rounded-xl border border-white/5 bg-[#0b0b0b] p-3.5 transition hover:border-red-500/10 hover:bg-[#101010]'
                     >
                       <div className={`flex items-center gap-2 ${stat.color}`}>
                         <Icon className='h-4 w-4' />
                         <p className='text-xs text-slate-400'>{stat.label}</p>
                       </div>
                       <h3 className='mt-2 text-lg font-bold text-white'>{stat.value}</h3>
+                      <p className='mt-0.5 text-xs text-slate-600'>{stat.subtext}</p>
                     </div>
                   );
                 })}
