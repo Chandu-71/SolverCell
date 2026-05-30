@@ -629,6 +629,46 @@ router.get(
   }),
 );
 
+router.delete(
+  '/:id',
+  asyncHandler(async (req, res) => {
+    const { userId } = getAuth(req);
+    const { id } = req.params;
+
+    if (!userId) {
+      return res.status(401).json({ success: false, message: 'Unauthorized' });
+    }
+
+    const me = await prisma.user.findUnique({ where: { clerkId: userId } });
+    if (!me) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    const problem = await prisma.problem.findUnique({ where: { id } });
+    if (!problem) {
+      return res.status(404).json({ success: false, message: 'Problem not found' });
+    }
+
+    // only the author can delete
+    if (problem.authorId !== me.id) {
+      return res.status(403).json({ success: false, message: 'Forbidden' });
+    }
+
+    // SolvedProblem and Submission don't have onDelete: Cascade on the problem
+    // relation, so delete them manually before deleting the problem.
+    // Everything else (TestCase, Like, Comment, Bookmark, ProblemTag) has
+    // onDelete: Cascade and will be cleaned up automatically.
+    // Message.problemId has onDelete: SetNull — messages are kept, problemId nulled.
+    await prisma.$transaction([
+      prisma.solvedProblem.deleteMany({ where: { problemId: id } }),
+      prisma.submission.deleteMany({ where: { problemId: id } }),
+      prisma.problem.delete({ where: { id } }),
+    ]);
+
+    res.json({ success: true, message: 'Problem deleted' });
+  }),
+);
+
 router.get(
   '/:id/submissions',
   asyncHandler(async (req, res) => {
