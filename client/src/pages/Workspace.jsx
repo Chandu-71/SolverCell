@@ -19,8 +19,7 @@ const Workspace = () => {
 
   const [code, setCode] = useState('');
   const [lang, setLang] = useState('python');
-
-  const [activeCase, setActiveCase] = useState(0);
+  const [runInput, setRunInput] = useState('');
   const [activeSideTab, setActiveSideTab] = useState('description');
 
   const [runLoading, setRunLoading] = useState(false);
@@ -38,7 +37,7 @@ const Workspace = () => {
       setRunResult(null);
       setSubmitResult(null);
 
-      const stdin = problem?.testCases?.[activeCase]?.input || '';
+      const stdin = runInput || '';
 
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/code/run`, {
         method: 'POST',
@@ -166,6 +165,14 @@ const Workspace = () => {
     fetchProblem();
   }, [problemId, getToken]);
 
+  React.useEffect(() => {
+    if (problem) {
+      setRunInput(problem.testCases?.[0]?.input || '');
+      setRunResult(null);
+      setSubmitResult(null);
+    }
+  }, [problem]);
+
   if (loading) {
     return <Loading />;
   }
@@ -210,8 +217,12 @@ const Workspace = () => {
                     problem={problem}
                     runResult={runResult}
                     submitResult={submitResult}
-                    activeCase={activeCase}
-                    setActiveCase={setActiveCase}
+                    runInput={runInput}
+                    setRunInput={value => {
+                      setRunInput(value);
+                      setRunResult(null);
+                      setSubmitResult(null);
+                    }}
                   />
                 </div>
               </Split>

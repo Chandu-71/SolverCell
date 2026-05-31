@@ -17,7 +17,7 @@ const slugify = str =>
     .replace(/[^a-z0-9\s-]/g, '')
     .replace(/\s+/g, '-');
 
-const validate = ({ title, summary, description, tags, visibleTCs }) => {
+const validate = ({ title, summary, description, tags, visibleTCs, hiddenTCs }) => {
   const e = {};
   if (!title.trim()) e.title = 'Title is required';
   if (title.length > 150) e.title = 'Max 150 characters';
@@ -25,7 +25,15 @@ const validate = ({ title, summary, description, tags, visibleTCs }) => {
   if (summary.length > 280) e.summary = 'Max 280 characters';
   if (!description.trim()) e.description = 'Description is required';
   if (tags.length === 0) e.tags = 'Add at least one tag';
-  if (!visibleTCs.every(tc => tc.input.trim() && tc.output.trim())) e.testcases = 'All visible test cases need both input and output';
+  if (!visibleTCs[0]?.input.trim() || !visibleTCs[0]?.output.trim()) {
+    e.testcases = 'The visible test case needs both input and output';
+  }
+  const hiddenFilled = hiddenTCs.filter(tc => tc.input.trim() || tc.output.trim());
+  if (hiddenFilled.length === 0) {
+    e.testcases = 'Add at least one hidden test case';
+  } else if (!hiddenFilled.every(tc => tc.input.trim() && tc.output.trim())) {
+    e.testcases = 'Hidden test cases must have both input and output';
+  }
   return e;
 };
 
@@ -50,7 +58,7 @@ const CreateProblemPage = () => {
 
   // ── submit ──────────────────────────────────────────────────
   const handleSubmit = async () => {
-    const e = validate({ title, summary, description, tags, visibleTCs });
+    const e = validate({ title, summary, description, tags, visibleTCs, hiddenTCs });
     setErrors(e);
 
     if (Object.keys(e).length > 0) return;
@@ -70,11 +78,13 @@ const CreateProblemPage = () => {
 
         constraints: constraints.trim() || null,
 
-        testCases: visibleTCs.map((tc, i) => ({
-          label: `Case ${i + 1}`,
-          input: tc.input.trim(),
-          expectedOutput: tc.output.trim(),
-        })),
+        testCases: [
+          {
+            label: 'Example',
+            input: visibleTCs[0].input.trim(),
+            expectedOutput: visibleTCs[0].output.trim(),
+          },
+        ],
 
         hiddenTestCases: hiddenTCs
           .filter(tc => tc.input.trim() && tc.output.trim())

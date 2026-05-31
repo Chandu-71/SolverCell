@@ -127,6 +127,30 @@ router.post(
 
     const { title, slug, summary, description, difficulty, tags, constraints, testCases, hiddenTestCases } = req.body;
 
+    const visibleCases = Array.isArray(testCases) ? testCases.filter(tc => tc.input?.trim() && tc.expectedOutput?.trim()) : [];
+    const hiddenCases = Array.isArray(hiddenTestCases) ? hiddenTestCases.filter(tc => tc.input?.trim() && tc.expectedOutput?.trim()) : [];
+
+    if (visibleCases.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'At least one visible test case with input and output is required',
+      });
+    }
+
+    if (hiddenCases.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'At least one hidden test case with input and output is required',
+      });
+    }
+
+    if (hiddenCases.length > 10) {
+      return res.status(400).json({
+        success: false,
+        message: 'A maximum of 10 hidden test cases is allowed',
+      });
+    }
+
     const existingProblem = await prisma.problem.findUnique({
       where: { slug },
     });
@@ -170,7 +194,7 @@ router.post(
 
         testCases: {
           create: [
-            ...testCases.map((tc, i) => ({
+            ...visibleCases.map((tc, i) => ({
               label: tc.label || `Case ${i + 1}`,
               input: tc.input,
               expectedOutput: tc.expectedOutput,
@@ -178,12 +202,12 @@ router.post(
               orderIndex: i,
             })),
 
-            ...hiddenTestCases.map((tc, i) => ({
+            ...hiddenCases.map((tc, i) => ({
               label: `Hidden ${i + 1}`,
               input: tc.input,
               expectedOutput: tc.expectedOutput,
               isHidden: true,
-              orderIndex: testCases.length + i,
+              orderIndex: visibleCases.length + i,
             })),
           ],
         },

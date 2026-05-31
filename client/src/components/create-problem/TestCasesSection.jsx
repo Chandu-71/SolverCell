@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { Plus, Trash2, Eye, EyeOff, Lock } from 'lucide-react';
+import { Plus, Trash2, Lock } from 'lucide-react';
 import { Section, uid } from './Shared';
 
-const TestCaseRow = ({ tc, index, isHidden, totalVisible, onChange, onRemove }) => (
+const TestCaseRow = ({ tc, index, isHidden, onChange, onRemove }) => (
   <div className='group relative rounded-xl border border-white/6 bg-[#0f0f0f] p-4 transition hover:border-white/10'>
     <div className='mb-3 flex items-center justify-between'>
       <span className='flex items-center gap-2 text-xs font-medium text-slate-500'>
@@ -15,7 +15,7 @@ const TestCaseRow = ({ tc, index, isHidden, totalVisible, onChange, onRemove }) 
           <>Test case {index + 1}</>
         )}
       </span>
-      {(isHidden || totalVisible > 1) && (
+      {isHidden && (
         <button
           onClick={onRemove}
           className='cursor-pointer rounded-lg p-1.5 text-slate-600 opacity-0 transition hover:bg-red-500/10 hover:text-red-400 group-hover:opacity-100'
@@ -51,8 +51,6 @@ const TestCaseRow = ({ tc, index, isHidden, totalVisible, onChange, onRemove }) 
 );
 
 const TestCasesSection = ({ visibleTCs, setVisibleTCs, hiddenTCs, setHiddenTCs, errors }) => {
-  const [showHidden, setShowHidden] = useState(false);
-
   const addTC = (list, setList) => setList(l => [...l, { id: uid(), input: '', output: '' }]);
   const removeTC = (list, setList, id) => setList(l => l.filter(tc => tc.id !== id));
   const updateTC = (list, setList, id, updated) => setList(l => l.map(tc => (tc.id === id ? { ...tc, ...updated } : tc)));
@@ -61,65 +59,42 @@ const TestCasesSection = ({ visibleTCs, setVisibleTCs, hiddenTCs, setHiddenTCs, 
     <Section
       number='5'
       title='Test cases'
-      subtitle='Visible cases are shown to the solver. Hidden ones are used for judging only.'
+      subtitle='One example testcase is shown to solvers. Hidden testcases are used for judging and are required.'
       error={errors.testcases}
     >
       <div className='space-y-4'>
         {/* visible */}
         <div className='space-y-3'>
           {visibleTCs.map((tc, i) => (
-            <TestCaseRow
-              key={tc.id}
-              tc={tc}
-              index={i}
-              isHidden={false}
-              totalVisible={visibleTCs.length}
-              onChange={u => updateTC(visibleTCs, setVisibleTCs, tc.id, u)}
-              onRemove={() => removeTC(visibleTCs, setVisibleTCs, tc.id)}
-            />
+            <TestCaseRow key={tc.id} tc={tc} index={i} isHidden={false} onChange={u => updateTC(visibleTCs, setVisibleTCs, tc.id, u)} />
           ))}
-          <button
-            onClick={() => addTC(visibleTCs, setVisibleTCs)}
-            className='flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-white/10 px-4 py-3 text-sm text-slate-500 transition hover:border-white/25 hover:text-slate-300'
-          >
-            <Plus size={14} /> Add visible test case
-          </button>
         </div>
 
-        {/* hidden toggle */}
         <div className='border-t border-white/6 pt-4'>
-          <button
-            onClick={() => setShowHidden(v => !v)}
-            className='flex cursor-pointer items-center gap-2 text-sm text-slate-500 transition hover:text-slate-300'
-          >
-            {showHidden ? <EyeOff size={14} /> : <Eye size={14} />}
-            {showHidden ? 'Hide' : 'Add hidden test cases'}
-            <span className='ml-1 rounded-full border border-amber-500/20 bg-amber-500/8 px-2 py-0.5 text-xs text-amber-400'>
-              <Lock size={9} className='mr-0.5 inline' /> judging only
-            </span>
-          </button>
-
-          {showHidden && (
-            <div className='mt-4 space-y-3'>
-              {hiddenTCs.map((tc, i) => (
-                <TestCaseRow
-                  key={tc.id}
-                  tc={tc}
-                  index={i}
-                  isHidden
-                  totalVisible={hiddenTCs.length}
-                  onChange={u => updateTC(hiddenTCs, setHiddenTCs, tc.id, u)}
-                  onRemove={() => removeTC(hiddenTCs, setHiddenTCs, tc.id)}
-                />
-              ))}
-              <button
-                onClick={() => addTC(hiddenTCs, setHiddenTCs)}
-                className='flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-amber-500/15 px-4 py-3 text-sm text-amber-600 transition hover:border-amber-500/30 hover:text-amber-400'
-              >
-                <Plus size={14} /> Add hidden test case
-              </button>
-            </div>
-          )}
+          <div className='mt-4 space-y-3'>
+            {hiddenTCs.map((tc, i) => (
+              <TestCaseRow
+                key={tc.id}
+                tc={tc}
+                index={i}
+                isHidden
+                onChange={u => updateTC(hiddenTCs, setHiddenTCs, tc.id, u)}
+                onRemove={() => removeTC(hiddenTCs, setHiddenTCs, tc.id)}
+              />
+            ))}
+            <button
+              onClick={() => addTC(hiddenTCs, setHiddenTCs)}
+              disabled={hiddenTCs.length >= 10}
+              className={`flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed px-4 py-3 text-sm transition ${
+                hiddenTCs.length >= 10
+                  ? 'border-slate-700 bg-slate-900 text-slate-500 cursor-not-allowed'
+                  : 'border-amber-500/15 text-amber-600 hover:border-amber-500/30 hover:text-amber-400'
+              }`}
+            >
+              <Plus size={14} /> Add hidden test case
+            </button>
+            {hiddenTCs.length >= 10 && <p className='text-xs text-slate-500'>Max 10 hidden test cases reached.</p>}
+          </div>
         </div>
       </div>
     </Section>
