@@ -555,6 +555,47 @@ router.delete(
 );
 
 router.get(
+  '/trending',
+  asyncHandler(async (req, res) => {
+    const limit = Math.min(parseInt(req.query.limit ?? '5'), 20);
+
+    const problems = await prisma.problem.findMany({
+      include: {
+        author: {
+          select: { username: true },
+        },
+      },
+    });
+
+    const now = Date.now();
+
+    // Trending formula
+    const scored = problems
+      .map(p => {
+        const raw = p.likesCount * 3 + p.commentsCount * 4 + p.sharesCount * 6 + p.successfulSolves * 5;
+
+        const ageInDays = (now - new Date(p.createdAt).getTime()) / (1000 * 60 * 60 * 24);
+        const trendingScore = raw / Math.pow(ageInDays + 2, 1.5);
+
+        return { ...p, trendingScore, rawScore: raw };
+      })
+      .sort((a, b) => b.trendingScore - a.trendingScore)
+      .slice(0, limit);
+
+    const formatted = scored.map(p => ({
+      id: p.id,
+      title: p.title,
+      slug: p.slug,
+      difficulty: p.difficulty,
+      trendingScore: Math.round(p.trendingScore * 100) / 100,
+      author: p.author,
+    }));
+
+    res.json({ success: true, problems: formatted });
+  }),
+);
+
+router.get(
   '/:id',
   asyncHandler(async (req, res) => {
     const { id } = req.params;
