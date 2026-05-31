@@ -1,6 +1,3 @@
--- CreateSchema
-CREATE SCHEMA IF NOT EXISTS "public";
-
 -- CreateEnum
 CREATE TYPE "Difficulty" AS ENUM ('Easy', 'Medium', 'Hard');
 
@@ -22,19 +19,19 @@ CREATE TYPE "MessageStatus" AS ENUM ('SENT', 'DELIVERED', 'SEEN');
 -- CreateTable
 CREATE TABLE "User" (
     "id" TEXT NOT NULL,
-    "username" TEXT NOT NULL,
-    "bio" TEXT,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-    "avatarUrl" TEXT,
     "clerkId" TEXT NOT NULL,
-    "currentStreak" INTEGER NOT NULL DEFAULT 0,
+    "username" TEXT NOT NULL,
     "displayName" TEXT NOT NULL,
-    "eloRating" INTEGER NOT NULL DEFAULT 0,
     "email" TEXT NOT NULL,
-    "joinedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "lastSolvedAt" TIMESTAMP(3),
+    "avatarUrl" TEXT,
+    "bio" TEXT,
     "location" TEXT,
+    "joinedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "eloRating" INTEGER NOT NULL DEFAULT 0,
+    "currentStreak" INTEGER NOT NULL DEFAULT 0,
     "longestStreak" INTEGER NOT NULL DEFAULT 0,
+    "lastSolvedAt" TIMESTAMP(3),
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
@@ -49,13 +46,13 @@ CREATE TABLE "Problem" (
     "description" TEXT NOT NULL,
     "difficulty" "Difficulty" NOT NULL,
     "constraints" TEXT,
-    "starterCode" JSONB,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "likesCount" INTEGER NOT NULL DEFAULT 0,
     "totalAttempts" INTEGER NOT NULL DEFAULT 0,
     "successfulSolves" INTEGER NOT NULL DEFAULT 0,
     "commentsCount" INTEGER NOT NULL DEFAULT 0,
+    "sharesCount" INTEGER NOT NULL DEFAULT 0,
 
     CONSTRAINT "Problem_pkey" PRIMARY KEY ("id")
 );
@@ -77,13 +74,21 @@ CREATE TABLE "ProblemTag" (
 );
 
 -- CreateTable
+CREATE TABLE "Bookmark" (
+    "userId" TEXT NOT NULL,
+    "problemId" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "Bookmark_pkey" PRIMARY KEY ("userId","problemId")
+);
+
+-- CreateTable
 CREATE TABLE "TestCase" (
     "id" TEXT NOT NULL,
     "problemId" TEXT NOT NULL,
     "label" TEXT,
     "input" TEXT NOT NULL,
     "expectedOutput" TEXT NOT NULL,
-    "explanation" TEXT,
     "isHidden" BOOLEAN NOT NULL DEFAULT false,
     "orderIndex" INTEGER NOT NULL DEFAULT 0,
 
@@ -199,10 +204,10 @@ CREATE TABLE "Message" (
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "User_username_key" ON "User"("username");
+CREATE UNIQUE INDEX "User_clerkId_key" ON "User"("clerkId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "User_clerkId_key" ON "User"("clerkId");
+CREATE UNIQUE INDEX "User_username_key" ON "User"("username");
 
 -- CreateIndex
 CREATE INDEX "User_clerkId_idx" ON "User"("clerkId");
@@ -224,6 +229,9 @@ CREATE INDEX "Problem_createdAt_idx" ON "Problem"("createdAt");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Tag_name_key" ON "Tag"("name");
+
+-- CreateIndex
+CREATE INDEX "Bookmark_problemId_idx" ON "Bookmark"("problemId");
 
 -- CreateIndex
 CREATE INDEX "TestCase_problemId_idx" ON "TestCase"("problemId");
@@ -283,13 +291,19 @@ ALTER TABLE "ProblemTag" ADD CONSTRAINT "ProblemTag_problemId_fkey" FOREIGN KEY 
 ALTER TABLE "ProblemTag" ADD CONSTRAINT "ProblemTag_tagId_fkey" FOREIGN KEY ("tagId") REFERENCES "Tag"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "Bookmark" ADD CONSTRAINT "Bookmark_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Bookmark" ADD CONSTRAINT "Bookmark_problemId_fkey" FOREIGN KEY ("problemId") REFERENCES "Problem"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "TestCase" ADD CONSTRAINT "TestCase_problemId_fkey" FOREIGN KEY ("problemId") REFERENCES "Problem"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Submission" ADD CONSTRAINT "Submission_problemId_fkey" FOREIGN KEY ("problemId") REFERENCES "Problem"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Submission" ADD CONSTRAINT "Submission_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Submission" ADD CONSTRAINT "Submission_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Submission" ADD CONSTRAINT "Submission_problemId_fkey" FOREIGN KEY ("problemId") REFERENCES "Problem"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Follow" ADD CONSTRAINT "Follow_followerId_fkey" FOREIGN KEY ("followerId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -298,25 +312,25 @@ ALTER TABLE "Follow" ADD CONSTRAINT "Follow_followerId_fkey" FOREIGN KEY ("follo
 ALTER TABLE "Follow" ADD CONSTRAINT "Follow_followingId_fkey" FOREIGN KEY ("followingId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Like" ADD CONSTRAINT "Like_problemId_fkey" FOREIGN KEY ("problemId") REFERENCES "Problem"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "Like" ADD CONSTRAINT "Like_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Comment" ADD CONSTRAINT "Comment_problemId_fkey" FOREIGN KEY ("problemId") REFERENCES "Problem"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Like" ADD CONSTRAINT "Like_problemId_fkey" FOREIGN KEY ("problemId") REFERENCES "Problem"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Comment" ADD CONSTRAINT "Comment_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "Comment" ADD CONSTRAINT "Comment_problemId_fkey" FOREIGN KEY ("problemId") REFERENCES "Problem"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "Notification" ADD CONSTRAINT "Notification_recipientId_fkey" FOREIGN KEY ("recipientId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "SolvedProblem" ADD CONSTRAINT "SolvedProblem_problemId_fkey" FOREIGN KEY ("problemId") REFERENCES "Problem"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "SolvedProblem" ADD CONSTRAINT "SolvedProblem_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "SolvedProblem" ADD CONSTRAINT "SolvedProblem_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "SolvedProblem" ADD CONSTRAINT "SolvedProblem_problemId_fkey" FOREIGN KEY ("problemId") REFERENCES "Problem"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "ConversationParticipant" ADD CONSTRAINT "ConversationParticipant_conversationId_fkey" FOREIGN KEY ("conversationId") REFERENCES "Conversation"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -328,8 +342,7 @@ ALTER TABLE "ConversationParticipant" ADD CONSTRAINT "ConversationParticipant_us
 ALTER TABLE "Message" ADD CONSTRAINT "Message_conversationId_fkey" FOREIGN KEY ("conversationId") REFERENCES "Conversation"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Message" ADD CONSTRAINT "Message_problemId_fkey" FOREIGN KEY ("problemId") REFERENCES "Problem"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "Message" ADD CONSTRAINT "Message_senderId_fkey" FOREIGN KEY ("senderId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
+-- AddForeignKey
+ALTER TABLE "Message" ADD CONSTRAINT "Message_problemId_fkey" FOREIGN KEY ("problemId") REFERENCES "Problem"("id") ON DELETE SET NULL ON UPDATE CASCADE;
