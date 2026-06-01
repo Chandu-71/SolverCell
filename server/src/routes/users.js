@@ -354,7 +354,12 @@ router.get(
         bio: true,
         location: true,
         joinedAt: true,
+
         eloRating: true,
+
+        currentStreak: true,
+        longestStreak: true,
+        lastSolvedAt: true,
       },
     });
 
