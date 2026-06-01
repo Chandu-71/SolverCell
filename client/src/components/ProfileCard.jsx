@@ -23,7 +23,7 @@ const ProfileCard = ({ user }) => {
         </div>
 
         <div className='min-w-0 flex-1'>
-          <p className='truncate text-base font-semibold text-white'>{user.displayName}</p>
+          <p className='truncate text-lg font-semibold text-white'>{user.displayName}</p>
           <p className='mt-0.5 truncate text-sm text-slate-400'>@{user.username}</p>
         </div>
       </Link>
