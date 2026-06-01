@@ -30,6 +30,12 @@ const TestcasePanel = ({ problem, runResult, submitResult, runInput, setRunInput
                     </div>
                   </div>
 
+                  {result.selfSolve && result.status === 'ACCEPTED' && (
+                    <div className='rounded-xl border border-yellow-500/10 bg-yellow-500/5 px-4 py-3 text-yellow-300/80'>
+                      <p className='text-sm font-medium'>Accepted — own problem solutions do not affect ELO or streak.</p>
+                    </div>
+                  )}
+
                   {result.failedCase && (
                     <div className='rounded-xl border border-red-500/10 bg-red-500/5 px-4 py-3 text-red-300'>
                       <p className='font-medium'>Failed Case: {result.failedCase}</p>

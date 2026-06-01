@@ -182,7 +182,7 @@ router.get(
       },
     });
 
-    // 3. Fetch attempted problems (has submission but not solved)
+    // 3. Fetch attempted problems (has submission but not solved, and not authored by user)
     const attemptedProblems = await prisma.problem.findMany({
       where: {
         submissions: {
@@ -195,6 +195,9 @@ router.get(
           none: {
             userId: user.id,
           },
+        },
+        authorId: {
+          not: user.id,
         },
       },
       orderBy: { createdAt: 'desc' },

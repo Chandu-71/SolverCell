@@ -109,6 +109,25 @@ router.post(
       });
     }
 
+    // find problem
+    const problem = await prisma.problem.findUnique({
+      where: { id: problemId },
+      include: {
+        author: {
+          select: {
+            id: true,
+          },
+        },
+      },
+    });
+
+    if (!problem) {
+      return res.status(404).json({
+        success: false,
+        message: 'Problem not found',
+      });
+    }
+
     // get hidden testcases
     const hiddenCases = await prisma.testCase.findMany({
       where: {
@@ -194,6 +213,20 @@ router.post(
 
     // if accepted
     if (finalStatus === 'ACCEPTED') {
+      const isSelfSolve = problem.authorId === dbUser.id;
+
+      if (isSelfSolve) {
+        return res.json({
+          success: true,
+          status: finalStatus,
+          language,
+          runtime: finalRuntime,
+          memory: finalMemory,
+          rewards: null,
+          selfSolve: true,
+        });
+      }
+
       // Award ELO + update streak
       const rewards = await handleFirstSolve({
         userId: dbUser.id,
@@ -204,17 +237,6 @@ router.post(
 
       // if it's the user's first time solving it, notify the author
       if (!rewards.alreadySolved) {
-        const problem = await prisma.problem.findUnique({
-          where: { id: problemId },
-          include: {
-            author: {
-              select: {
-                id: true,
-              },
-            },
-          },
-        });
-
         if (problem?.author?.id !== dbUser.id) {
           await notify({
             recipientId: problem.author.id,
