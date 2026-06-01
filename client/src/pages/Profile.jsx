@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Heart, MapPin, CalendarDays, Trophy, CircleCheckBig, Target, Flame } from 'lucide-react';
+import { Heart, MapPin, CalendarDays, Trophy, CircleCheckBig, Target, Flame, MessageSquare } from 'lucide-react';
 import { useUser, useClerk, useAuth } from '@clerk/react';
 import useCurrentUser from '../hooks/useCurrentUser';
 import Loading from '../components/Loading';
@@ -46,6 +46,7 @@ const Profile = () => {
   // ── Follow State ──────────────────────────────────────────────
   const [isFollowing, setIsFollowing] = useState(false);
   const [followLoading, setFollowLoading] = useState(false);
+  const [messageLoading, setMessageLoading] = useState(false);
   const [followersCount, setFollowersCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
   const [followers, setFollowers] = useState([]);
@@ -186,6 +187,35 @@ const Profile = () => {
     setFollowLoading(false);
   };
 
+  const handleMessageClick = async () => {
+    if (!profile?.username) return;
+
+    setMessageLoading(true);
+
+    try {
+      const token = await getToken();
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/conversations`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ targetUsername: profile.username }),
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        navigate(`/messages/${data.conversation.id}`);
+      } else {
+        console.error('Failed to start conversation:', data.message);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setMessageLoading(false);
+    }
+  };
+
   if (loading || publicLoading || !profile) {
     return <Loading />;
   }
@@ -272,15 +302,25 @@ const Profile = () => {
                           </button>
                         </>
                       ) : (
-                        <button
-                          onClick={handleFollowToggle}
-                          disabled={followLoading}
-                          className={`cursor-pointer rounded-full px-5 py-2 text-sm font-semibold text-white transition disabled:opacity-70 ${
-                            isFollowing ? 'bg-white/10 hover:bg-white/20' : 'bg-red-500 hover:bg-red-600'
-                          }`}
-                        >
-                          {followLoading ? '...' : isFollowing ? 'Following' : 'Follow'}
-                        </button>
+                        <>
+                          <button
+                            onClick={handleMessageClick}
+                            disabled={messageLoading}
+                            className='flex cursor-pointer items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-5 py-2 text-sm font-semibold text-white transition-all duration-200 hover:border-red-500/20 hover:bg-red-500/10 disabled:opacity-70'
+                          >
+                            <MessageSquare className='h-4 w-4' />
+                            {messageLoading ? '...' : 'Message'}
+                          </button>
+                          <button
+                            onClick={handleFollowToggle}
+                            disabled={followLoading}
+                            className={`cursor-pointer rounded-full px-5 py-2 text-sm font-semibold text-white transition disabled:opacity-70 ${
+                              isFollowing ? 'bg-white/10 hover:bg-white/20' : 'bg-red-500 hover:bg-red-600'
+                            }`}
+                          >
+                            {followLoading ? '...' : isFollowing ? 'Following' : 'Follow'}
+                          </button>
+                        </>
                       )}
                     </div>
                   </div>
