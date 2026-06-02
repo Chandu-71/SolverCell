@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import dotenv from 'dotenv';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
+import cron from 'node-cron';
 
 import errorHandler from './middleware/errorHandler.js';
 import { clerkMiddleware } from './middleware/auth.js';
@@ -17,6 +18,7 @@ import conversationRoutes from './routes/conversations.js';
 import messageRoutes from './routes/messages.js';
 import searchRoutes from './routes/search.js';
 import notificationRoutes from './routes/notifications.js';
+import leaderboardRoutes from './routes/leaderboard.js';
 
 dotenv.config();
 
@@ -143,6 +145,7 @@ app.use('/api/conversations', conversationRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/leaderboard', leaderboardRoutes);
 
 app.get('/health', (_, res) => res.json({ status: 'ok' }));
 
@@ -151,4 +154,17 @@ app.use(errorHandler);
 // use server.listen (not app.listen) so Socket.IO works
 server.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
+});
+
+// ── Cron job to reset weekly scores every Monday at 00:00 ──
+cron.schedule('0 0 * * 1', async () => {
+  try {
+    console.log('[cron] Running weekly score reset…');
+    const { count } = await prisma.user.updateMany({
+      data: { weeklyScore: 0 },
+    });
+    console.log(`[cron] Weekly reset done — ${count} users updated`);
+  } catch (err) {
+    console.error('[cron] Weekly reset failed:', err);
+  }
 });

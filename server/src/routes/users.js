@@ -74,9 +74,13 @@ router.get(
       });
     }
 
+    // Compute current all-time rank dynamically
+    const aboveMe = await prisma.user.count({ where: { eloRating: { gt: user.eloRating } } });
+    const currentRank = aboveMe + 1;
+
     res.json({
       success: true,
-      user,
+      user: { ...user, currentRank },
     });
   }),
 );
@@ -363,6 +367,9 @@ router.get(
         currentStreak: true,
         longestStreak: true,
         lastSolvedAt: true,
+
+        weeklyScore: true,
+        bestRank: true,
       },
     });
 

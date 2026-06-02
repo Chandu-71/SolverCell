@@ -32,6 +32,10 @@ model User {
   longestStreak Int       @default(0)
   lastSolvedAt  DateTime?
 
+  // leaderboard
+  weeklyScore   Int       @default(0)
+  bestRank      Int?
+
   // relations
   problems       Problem[]
   submissions    Submission[]

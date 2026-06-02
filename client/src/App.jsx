@@ -13,6 +13,7 @@ import Discover from './pages/Discover';
 import Notifications from './pages/Notifications';
 import CreateProblem from './pages/CreateProblem';
 import Workspace from './pages/Workspace';
+import Leaderboard from './pages/Leaderboard';
 
 import NotFound from './pages/NotFound';
 import Loading from './components/Loading';
@@ -101,6 +102,15 @@ const App = () => {
           element={
             <Show when='signed-in' fallback={<Navigate to='/login' replace />}>
               <Notifications />
+            </Show>
+          }
+        />
+
+        <Route
+          path='/leaderboard'
+          element={
+            <Show when='signed-in' fallback={<Navigate to='/login' replace />}>
+              <Leaderboard />
             </Show>
           }
         />

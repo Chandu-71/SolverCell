@@ -1,4 +1,4 @@
-import { Home, MessageSquare, Search, Bell, Plus } from 'lucide-react';
+import { Home, MessageSquare, Search, Bell, Plus, Trophy } from 'lucide-react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { navbarItems, assets } from '../assets/assets';
 
@@ -6,7 +6,7 @@ import useCurrentUser from '../hooks/useCurrentUser';
 import useNotificationCount from '../hooks/useNotificationCount';
 import useUnreadMessagesCount from '../hooks/useUnreadMessagesCount';
 
-const iconMap = { Home, MessageSquare, Search, Bell };
+const iconMap = { Home, MessageSquare, Search, Bell, Trophy };
 
 const LeftSidebar = ({ collapsed = false }) => {
   const navigate = useNavigate();

@@ -9,6 +9,7 @@ export const navbarItems = [
   { label: 'Messages', icon: 'MessageSquare', path: '/messages' },
   { label: 'Search', icon: 'Search', path: '/discover' },
   { label: 'Notifications', icon: 'Bell', path: '/notifications' },
+  { label: 'Leaderboard', icon: 'Trophy', path: '/leaderboard' },
 ];
 
 // ─────────────── TAGS MASTER LIST ──────────────────────────────
