@@ -34,7 +34,7 @@ model User {
 
   // leaderboard
   weeklyScore   Int       @default(0)
-  bestRank      Int?
+  bestRank      Int?                   // best weekly leaderboard rank ever achieved
 
   // relations
   problems       Problem[]

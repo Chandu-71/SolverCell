@@ -156,15 +156,47 @@ server.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
 
-// ── Cron job to reset weekly scores every Monday at 00:00 ──
+// ── Cron job: Monday 00:00 — lock best ranks, then reset weekly scores ──
 cron.schedule('0 0 * * 1', async () => {
+  console.log('[cron] Weekly reset starting…');
+
   try {
-    console.log('[cron] Running weekly score reset…');
+    // ── Phase 1: update bestRank ──────────────────────────────
+    // Only consider users who actually participated this week.
+    // weeklyScore === 0 means they didn't solve anything — skip them.
+    const participants = await prisma.user.findMany({
+      where:   { weeklyScore: { gt: 0 } },
+      orderBy: [{ weeklyScore: 'desc' }, { username: 'asc' }],
+      select:  { id: true, weeklyScore: true, bestRank: true },
+    });
+
+    // Assign weekly ranks and collect updates for anyone who improved
+    const bestRankUpdates = participants
+      .map((user, idx) => {
+        const weeklyRank = idx + 1;
+        if (user.bestRank === null || weeklyRank < user.bestRank) {
+          return prisma.user.update({
+            where: { id: user.id },
+            data:  { bestRank: weeklyRank },
+          });
+        }
+        return null;
+      })
+      .filter(Boolean);
+
+    if (bestRankUpdates.length > 0) {
+      await prisma.$transaction(bestRankUpdates);
+      console.log(`[cron] bestRank updated for ${bestRankUpdates.length} users`);
+    }
+
+    // ── Phase 2: reset ALL weeklyScores ──────────────────────
     const { count } = await prisma.user.updateMany({
       data: { weeklyScore: 0 },
     });
-    console.log(`[cron] Weekly reset done — ${count} users updated`);
+
+    console.log(`[cron] Weekly reset done — ${count} scores reset`);
   } catch (err) {
     console.error('[cron] Weekly reset failed:', err);
   }
 });
+

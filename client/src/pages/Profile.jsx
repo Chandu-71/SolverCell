@@ -215,18 +215,11 @@ const Profile = () => {
   const eloRating = profile.eloRating ?? 0;
   const currentStreak = profile.currentStreak ?? 0;
   const longestStreak = profile.longestStreak ?? 0;
+  const allTimeRank = profile.currentRank ?? null;
+  const weeklyRank = profile.weeklyRank ?? null;
+  const bestRank = profile.bestRank ?? null;
 
   const statsWidgets = [
-    {
-      label: 'ELO',
-      value: profile.eloRating ?? 0,
-      subtext:
-        [profile.currentRank ? `Rank #${profile.currentRank}` : null, profile.bestRank ? `Best #${profile.bestRank}` : null]
-          .filter(Boolean)
-          .join(' · ') || 'No rank yet',
-      icon: Trophy,
-      color: 'text-yellow-400',
-    },
     {
       label: 'Problems Solved',
       value: solvedCount,
@@ -357,19 +350,52 @@ const Profile = () => {
               </div>
 
               {/* STATS WIDGETS */}
-              <div className='mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4'>
+              <div className='mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4'>
+                {/* COMPETITIVE RATING WIDGET */}
+                <div className='flex flex-col justify-between rounded-xl border border-white/5 bg-[#0b0b0b] p-3.5 transition hover:border-yellow-500/30 hover:bg-[#101010]'>
+                  <div className='flex items-center justify-between'>
+                    <div className='flex items-center gap-2 text-yellow-400'>
+                      <Trophy className='h-4 w-4' />
+                      <p className='text-xs text-slate-300'>Competitive</p>
+                    </div>
+                    <div className='flex items-baseline gap-1'>
+                      <h3 className='text-lg font-bold text-white'>{eloRating}</h3>
+                      <span className='text-[10px] font-medium text-slate-500'>ELO</span>
+                    </div>
+                  </div>
+
+                  {/* Ranks */}
+                  <div className='mt-2 flex items-center justify-between border-t border-white/5 pt-2'>
+                    <div>
+                      <p className='text-[10px] text-slate-400'>All-Time Rank</p>
+                      <p className='text-xs font-bold text-white'>{allTimeRank != null ? `#${allTimeRank}` : '—'}</p>
+                    </div>
+                    <div>
+                      <p className='text-[10px] text-slate-400'>Weekly Rank</p>
+                      <p className='text-xs font-bold text-white'>{weeklyRank != null ? `#${weeklyRank}` : '—'}</p>
+                    </div>
+                    <div>
+                      <p className='text-[10px] text-slate-400'>Best Weekly</p>
+                      <p className='text-xs font-bold text-white'>{bestRank != null ? `#${bestRank}` : '—'}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* STANDARD WIDGETS */}
                 {statsWidgets.map((stat, idx) => {
                   const Icon = stat.icon;
                   return (
                     <div
                       key={idx}
-                      className='rounded-xl border border-white/5 bg-[#0b0b0b] p-3.5 transition hover:border-red-500/10 hover:bg-[#101010]'
+                      className='flex flex-col justify-between rounded-xl border border-white/5 bg-[#0b0b0b] p-3.5 transition hover:border-red-500/10 hover:bg-[#101010]'
                     >
-                      <div className={`flex items-center gap-2 ${stat.color}`}>
-                        <Icon className='h-4 w-4' />
-                        <p className='text-xs text-slate-300'>{stat.label}</p>
+                      <div>
+                        <div className={`flex items-center gap-2 ${stat.color}`}>
+                          <Icon className='h-4 w-4' />
+                          <p className='text-xs text-slate-300'>{stat.label}</p>
+                        </div>
+                        <h3 className='mt-2 text-lg font-bold text-white'>{stat.value}</h3>
                       </div>
-                      <h3 className='mt-2 text-lg font-bold text-white'>{stat.value}</h3>
                       <p className='mt-0.5 text-xs text-slate-400'>{stat.subtext}</p>
                     </div>
                   );

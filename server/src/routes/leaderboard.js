@@ -27,6 +27,9 @@ router.get(
     };
 
     const top100 = await prisma.user.findMany({
+      where: isWeekly
+        ? { weeklyScore: { gt: 0 } }
+        : undefined,
       orderBy: [{ [orderField]: 'desc' }, { username: 'asc' }],
       take: 100,
       select: USER_SELECT,

@@ -50,17 +50,20 @@ const MyRankCard = ({ entry, isWeekly }) => {
             <span className='text-slate-400'>
               Current Score: <span className='font-semibold text-white'>{entry.weeklyScore} pts</span>
             </span>
+            <span className='text-slate-400'>
+              Best Weekly Rank: <span className='font-semibold text-white'>{entry.bestRank != null ? `#${entry.bestRank}` : '—'}</span>
+            </span>
           </>
         ) : (
           <>
             <span className='text-slate-400'>
               Current ELO: <span className='font-semibold text-white'>{entry.eloRating}</span>
             </span>
+            <span className='text-slate-400'>
+              All-Time Rank: <span className='font-semibold text-white'>#{entry.rank}</span>
+            </span>
           </>
         )}
-        <span className='text-slate-400'>
-          Best Rank: <span className='font-semibold text-white'>#{entry.bestRank || entry.rank}</span>
-        </span>
       </div>
     </div>
   );

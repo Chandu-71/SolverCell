@@ -33,7 +33,6 @@ export const handleFirstSolve = async ({ userId, problemId, runtime, memory }) =
         longestStreak: true,
         lastSolvedAt: true,
         eloRating: true,
-        bestRank: true,
       },
     }),
   ]);
@@ -68,6 +67,10 @@ export const handleFirstSolve = async ({ userId, problemId, runtime, memory }) =
 
   const newLongest = Math.max(newStreak, user.longestStreak);
 
+  // ── atomic write ─────────────────────────────────────────────
+  // weeklyScore increments alongside ELO.
+  // bestRank is NOT updated here — it is only updated by the
+  // Monday 00:00 cron job before resetting weeklyScore.
   await prisma.$transaction([
     prisma.solvedProblem.create({
       data: { userId, problemId, bestRuntime: runtime ?? null, bestMemory: memory ?? null },
@@ -88,19 +91,5 @@ export const handleFirstSolve = async ({ userId, problemId, runtime, memory }) =
     }),
   ]);
 
-  // ── update bestRank after the new ELO is committed ───────────
-  const newElo = user.eloRating + points;
-  const aboveMe = await prisma.user.count({
-    where: { eloRating: { gt: newElo }, id: { not: userId } },
-  });
-  const newRank = aboveMe + 1;
-
-  if (user.bestRank == null || newRank < user.bestRank) {
-    await prisma.user.update({
-      where: { id: userId },
-      data: { bestRank: newRank },
-    });
-  }
-
-  return { alreadySolved: false, eloGained: points, newStreak, newLongest, newRank };
+  return { alreadySolved: false, eloGained: points, newStreak, newLongest };
 };
