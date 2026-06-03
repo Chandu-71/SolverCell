@@ -1,7 +1,15 @@
 import logo from './logo.png';
+import shot1 from './shot1.png';
+import shot2 from './shot2.png';
+import shot3 from './shot3.png';
+import shot4 from './shot4.png';
 
 export const assets = {
   logo,
+  shot1,
+  shot2,
+  shot3,
+  shot4,
 };
 
 export const navbarItems = [
