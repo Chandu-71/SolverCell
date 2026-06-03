@@ -1,47 +1,56 @@
 import { Link } from 'react-router-dom';
-import { Sparkles } from 'lucide-react';
-
-const getRankLabel = elo => {
-  if (elo >= 10000) return 'Grandmaster';
-  if (elo >= 5000) return 'Master';
-  if (elo >= 1500) return 'Solver';
-  if (elo >= 150) return 'Explorer';
-  return 'Novice';
-};
+import { Zap, Trophy, Medal } from 'lucide-react';
 
 const ProfileCard = ({ user }) => {
   const eloRating = user.eloRating ?? 0;
-  const rankLabel = getRankLabel(eloRating);
-  const imageUrl = user.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`;
+  const currentRank = user.currentRank ?? null;
+  const bestRank = user.bestRank ?? null;
 
   return (
-    <div className='rounded-xl border border-white/10 bg-[#0d0d0d] p-5 shadow-xl shadow-black/20 backdrop-blur-xl'>
-      {/* ── Avatar + Name ── */}
-      <Link to='/profile' className='flex items-center gap-4 transition hover:opacity-80'>
+    <div className='rounded-2xl border border-white/10 bg-[#0d0d0d] p-5 shadow-2xl shadow-black/40'>
+      {/* avatar + name */}
+      <Link to='/profile' className='group flex items-center gap-4 transition-all hover:opacity-80'>
         <div className='relative shrink-0'>
-          <img src={imageUrl} alt={`${user.displayName}'s profile`} className='h-16 w-16 rounded-full border border-white/10 object-cover' />
+          <img
+            src={user.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`}
+            alt={user.displayName}
+            className='h-16 w-16 rounded-full border border-white/10 object-cover'
+          />
         </div>
 
         <div className='min-w-0 flex-1'>
-          <p className='truncate text-lg font-semibold text-white'>{user.displayName}</p>
-          <p className='mt-0.5 truncate text-sm text-slate-400'>@{user.username}</p>
+          <p className='truncate text-lg font-bold tracking-tight text-white'>{user.displayName}</p>
+          <p className='mt-0.5 truncate text-sm font-medium text-slate-400'>@{user.username}</p>
         </div>
       </Link>
 
-      {/* ── Rank Chip ── */}
-      <div className='mt-4 flex items-center gap-3 rounded-2xl bg-white/5 p-3.5'>
-        <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-rose-500/10 text-rose-300'>
-          <Sparkles className='h-5 w-5' />
+      {/* Unified Stats Container */}
+      <div className='mt-5 flex divide-x divide-white/5 rounded-xl border border-white/5 bg-white/2'>
+        {/* ELO */}
+        <div className='flex flex-1 flex-col items-center p-3'>
+          <div className='flex items-center gap-1.5'>
+            <Zap size={14} className='text-amber-400' />
+            <p className='text-[11px] font-bold uppercase tracking-wider text-slate-500'>ELO</p>
+          </div>
+          <p className='mt-1.5 text-base font-bold text-white'>{eloRating}</p>
         </div>
 
-        <div className='min-w-0'>
-          <p className='truncate text-xs text-slate-400'>Community rank</p>
-          <p className='truncate text-base font-semibold text-white'>{rankLabel}</p>
+        {/* Current Rank */}
+        <div className='flex flex-1 flex-col items-center p-3'>
+          <div className='flex items-center gap-1.5'>
+            <Trophy size={14} className='text-rose-400' />
+            <p className='text-[11px] font-bold uppercase tracking-wider text-slate-500'>Weekly</p>
+          </div>
+          <p className='mt-1.5 text-base font-bold text-white'>{currentRank != null ? `#${currentRank}` : '—'}</p>
         </div>
 
-        <div className='ml-auto shrink-0 text-right'>
-          <p className='text-xs text-slate-400'>ELO</p>
-          <p className='text-base font-semibold text-rose-400'>{eloRating}</p>
+        {/* Best Rank */}
+        <div className='flex flex-1 flex-col items-center p-3'>
+          <div className='flex items-center gap-1.5'>
+            <Medal size={14} className='text-sky-400' />
+            <p className='text-[11px] font-bold uppercase tracking-wider text-slate-500'>Best</p>
+          </div>
+          <p className='mt-1.5 text-base font-bold text-white'>{bestRank != null ? `#${bestRank}` : '—'}</p>
         </div>
       </div>
     </div>

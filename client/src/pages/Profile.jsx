@@ -10,15 +10,6 @@ import FollowModal from '../components/profile/FollowModal';
 import EditProfileModal from '../components/profile/EditProfileModal';
 import MyPosts from '../components/profile/MyPosts';
 
-// ── Helper: ELO Rank Label ────────────────────────────────────
-const getRankLabel = elo => {
-  if (elo >= 10000) return 'Grandmaster';
-  if (elo >= 5000) return 'Master';
-  if (elo >= 1500) return 'Solver';
-  if (elo >= 150) return 'Explorer';
-  return 'Novice';
-};
-
 const Profile = () => {
   const { user: clerkUser } = useUser();
   const { getToken } = useAuth();
@@ -222,12 +213,17 @@ const Profile = () => {
 
   // ── Widget Configuration ──────────────────────────────────────
   const eloRating = profile.eloRating ?? 0;
+  const currentStreak = profile.currentStreak ?? 0;
+  const longestStreak = profile.longestStreak ?? 0;
 
   const statsWidgets = [
     {
       label: 'ELO',
-      value: eloRating,
-      subtext: `Rank: ${getRankLabel(eloRating)}`, // Added Rank subtext
+      value: profile.eloRating ?? 0,
+      subtext:
+        [profile.currentRank ? `Rank #${profile.currentRank}` : null, profile.bestRank ? `Best #${profile.bestRank}` : null]
+          .filter(Boolean)
+          .join(' · ') || 'No rank yet',
       icon: Trophy,
       color: 'text-yellow-400',
     },
@@ -240,15 +236,15 @@ const Profile = () => {
     },
     {
       label: 'Current Streak',
-      value: `${profile.currentStreak ?? 0} days`,
-      subtext: `Best: ${profile.longestStreak ?? 0} days`,
+      value: `${currentStreak} ${currentStreak === 1 ? 'day' : 'days'}`,
+      subtext: `Best: ${longestStreak} ${longestStreak === 1 ? 'day' : 'days'}`,
       icon: Flame,
       color: 'text-rose-400',
     },
     {
       label: 'Likes',
       value: likesCount,
-      subtext: 'Total received', // Added Likes subtext
+      subtext: 'Total received',
       icon: Heart,
       color: 'text-rose-400',
     },
@@ -371,10 +367,10 @@ const Profile = () => {
                     >
                       <div className={`flex items-center gap-2 ${stat.color}`}>
                         <Icon className='h-4 w-4' />
-                        <p className='text-xs text-slate-400'>{stat.label}</p>
+                        <p className='text-xs text-slate-300'>{stat.label}</p>
                       </div>
                       <h3 className='mt-2 text-lg font-bold text-white'>{stat.value}</h3>
-                      <p className='mt-0.5 text-xs text-slate-600'>{stat.subtext}</p>
+                      <p className='mt-0.5 text-xs text-slate-400'>{stat.subtext}</p>
                     </div>
                   );
                 })}
