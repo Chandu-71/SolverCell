@@ -14,7 +14,7 @@ const Profile = () => {
   const { user: clerkUser } = useUser();
   const { getToken } = useAuth();
   const { openUserProfile, signOut } = useClerk();
-  const { user: dbUser, loading } = useCurrentUser();
+  const { user: dbUser, loading, refetch: refetchCurrentUser } = useCurrentUser();
   const { username } = useParams();
   const navigate = useNavigate();
 
@@ -151,10 +151,8 @@ const Profile = () => {
   // ── Handlers ──────────────────────────────────────────────────
   const handleProfileSave = async updatedUser => {
     setProfile(updatedUser);
-
-    setTimeout(() => {
-      window.location.reload();
-    }, 500);
+    await refetchCurrentUser();
+    setEditOpen(false);
   };
 
   const handleFollowToggle = async () => {

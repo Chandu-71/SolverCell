@@ -12,6 +12,7 @@ const useCurrentUser = () => {
     try {
       const token = await getToken();
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/users/me`, {
+        cache: 'no-store',
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();

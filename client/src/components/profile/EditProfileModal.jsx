@@ -107,10 +107,7 @@ const EditProfileModal = ({ user, onClose, onSave }) => {
 
       if (data.success) {
         onSave(data.user);
-
-        setTimeout(() => {
-          window.location.reload();
-        }, 300);
+        onClose();
       } else {
         if (data.message?.toLowerCase().includes('username')) {
           setErrors({ username: data.message });

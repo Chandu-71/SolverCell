@@ -38,8 +38,8 @@ router.post(
         where: { clerkId: userId },
         data: {
           email,
-          displayName,
           ...(avatarUrl ? { avatarUrl } : {}),
+          ...(user.displayName ? {} : { displayName }),
         },
       });
     }
@@ -76,11 +76,11 @@ router.get(
 
     // Compute current all-time rank (by ELO) and current weekly rank
     const [aboveMe, aboveMeWeekly] = await Promise.all([
-      prisma.user.count({ where: { eloRating:    { gt: user.eloRating    } } }),
-      prisma.user.count({ where: { weeklyScore:  { gt: user.weeklyScore  } } }),
+      prisma.user.count({ where: { eloRating: { gt: user.eloRating } } }),
+      prisma.user.count({ where: { weeklyScore: { gt: user.weeklyScore } } }),
     ]);
     const currentRank = aboveMe + 1;
-    const weeklyRank  = aboveMeWeekly + 1;
+    const weeklyRank = aboveMeWeekly + 1;
 
     res.json({
       success: true,
@@ -386,11 +386,11 @@ router.get(
 
     // Compute ranks dynamically
     const [aboveMe, aboveMeWeekly] = await Promise.all([
-      prisma.user.count({ where: { eloRating:   { gt: user.eloRating   } } }),
+      prisma.user.count({ where: { eloRating: { gt: user.eloRating } } }),
       prisma.user.count({ where: { weeklyScore: { gt: user.weeklyScore } } }),
     ]);
     const currentRank = aboveMe + 1;
-    const weeklyRank  = aboveMeWeekly + 1;
+    const weeklyRank = aboveMeWeekly + 1;
 
     res.json({
       success: true,
