@@ -17,6 +17,12 @@ const daysBetween = (a, b) => {
   return Math.floor((startOfDay(b) - startOfDay(a)) / msPerDay);
 };
 
+export const getActiveStreak = (currentStreak, lastSolvedAt, now = new Date()) => {
+  if (!lastSolvedAt) return 0;
+  const gap = daysBetween(lastSolvedAt, now);
+  return gap <= 1 ? currentStreak : 0;
+};
+
 export const handleFirstSolve = async ({ userId, problemId, runtime, memory }) => {
   const [existing, problem, user] = await Promise.all([
     prisma.solvedProblem.findUnique({

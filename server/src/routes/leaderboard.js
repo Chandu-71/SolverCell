@@ -3,6 +3,8 @@ import prisma from '../lib/prisma.js';
 import { getAuth } from '../middleware/auth.js';
 import asyncHandler from '../middleware/asyncHandler.js';
 
+import { getActiveStreak } from '../lib/Solverewards.js';
+
 const router = express.Router();
 
 // GET /api/leaderboard?tab=alltime|weekly
@@ -22,14 +24,13 @@ router.get(
       eloRating: true,
       weeklyScore: true,
       currentStreak: true,
+      lastSolvedAt: true,
       bestRank: true,
       _count: { select: { solvedProblems: true } },
     };
 
     const top100 = await prisma.user.findMany({
-      where: isWeekly
-        ? { weeklyScore: { gt: 0 } }
-        : undefined,
+      where: isWeekly ? { weeklyScore: { gt: 0 } } : undefined,
       orderBy: [{ [orderField]: 'desc' }, { username: 'asc' }],
       take: 100,
       select: USER_SELECT,
@@ -43,7 +44,7 @@ router.get(
       avatarUrl: u.avatarUrl,
       eloRating: u.eloRating,
       weeklyScore: u.weeklyScore,
-      currentStreak: u.currentStreak,
+      currentStreak: getActiveStreak(u.currentStreak, u.lastSolvedAt),
       bestRank: u.bestRank,
       solvedCount: u._count.solvedProblems,
       score: isWeekly ? u.weeklyScore : u.eloRating,
@@ -82,7 +83,7 @@ router.get(
           avatarUrl: me.avatarUrl,
           eloRating: me.eloRating,
           weeklyScore: me.weeklyScore,
-          currentStreak: me.currentStreak,
+          currentStreak: getActiveStreak(me.currentStreak, me.lastSolvedAt),
           bestRank: me.bestRank,
           solvedCount: me._count.solvedProblems,
           score: isWeekly ? me.weeklyScore : me.eloRating,

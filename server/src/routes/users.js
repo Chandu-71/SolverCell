@@ -1,5 +1,6 @@
 import express from 'express';
 import prisma from '../lib/prisma.js';
+import { getActiveStreak } from '../lib/Solverewards.js';
 import { getAuth } from '../middleware/auth.js';
 import asyncHandler from '../middleware/asyncHandler.js';
 
@@ -84,7 +85,12 @@ router.get(
 
     res.json({
       success: true,
-      user: { ...user, currentRank, weeklyRank },
+      user: {
+        ...user,
+        currentStreak: getActiveStreak(user.currentStreak, user.lastSolvedAt),
+        currentRank,
+        weeklyRank,
+      },
     });
   }),
 );
@@ -394,7 +400,12 @@ router.get(
 
     res.json({
       success: true,
-      user: { ...user, currentRank, weeklyRank },
+      user: {
+        ...user,
+        currentStreak: getActiveStreak(user.currentStreak, user.lastSolvedAt),
+        currentRank,
+        weeklyRank,
+      },
     });
   }),
 );
