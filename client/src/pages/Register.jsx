@@ -35,7 +35,7 @@ const Register = () => {
         </div>
 
         <p className='text-xl text-gray-400 text-center max-w-md leading-relaxed'>
-          Join a new generation of programmers sharing challenges, competing through code, and building recognition in the developer community.
+          Join a new generation of problem creators and solvers. Share challenges, compete weekly, and build your coding reputation
         </p>
 
         {/* Floating screenshot collage */}

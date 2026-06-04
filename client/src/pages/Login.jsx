@@ -35,7 +35,7 @@ const Login = () => {
         </div>
 
         <p className='text-xl text-gray-400 text-center max-w-md leading-relaxed'>
-          The modern network for programmers to share problems, solve challenges, compete live, and earn recognition through code.
+          The modern network for programmers to share problems, solve challenges, compete weekly, and build their reputation through code
         </p>
 
         {/* Floating screenshot collage section */}
