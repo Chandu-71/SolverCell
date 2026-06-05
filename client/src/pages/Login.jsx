@@ -4,6 +4,137 @@ import { dark } from '@clerk/themes';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { assets } from '../assets/assets';
 
+const clerkAppearance = {
+  theme: dark,
+
+  variables: {
+    colorPrimary: '#3b82f6',
+    colorBackground: '#121212',
+    colorInputBackground: '#1e1e1e',
+    colorInputText: '#ffffff',
+    colorText: '#ffffff',
+    colorTextSecondary: '#9ca3af',
+    colorNeutral: '#2a2a2a',
+    borderRadius: '12px',
+  },
+
+  layout: {
+    socialButtonsPlacement: 'top',
+    socialButtonsVariant: 'blockButton',
+  },
+
+  elements: {
+    card: `
+      bg-[#181818]
+      border border-gray-800
+      shadow-[0_0_50px_rgba(59,130,246,0.08)]
+      w-full
+      max-w-md
+      p-6
+      overflow-hidden
+    `,
+
+    headerTitle: `
+      text-white
+      text-3xl
+      font-bold
+      tracking-tight
+    `,
+
+    headerSubtitle: `
+      text-gray-400
+      text-sm
+      mt-1
+    `,
+
+    socialButtonsBlockButton: `
+      bg-[#202020]
+      border border-gray-700
+      hover:bg-[#2a2a2a]
+      text-white
+      transition-all
+      h-10
+      rounded-xl
+    `,
+
+    socialButtonsBlockButtonText: `
+      text-white
+      font-medium
+      text-sm
+    `,
+
+    socialButtonsProviderIcon: `
+      w-5
+      h-5
+    `,
+
+    dividerLine: `
+      bg-gray-800
+    `,
+
+    dividerText: `
+      text-gray-500
+      text-sm
+    `,
+
+    formFieldLabel: `
+      text-gray-300
+      text-sm
+      font-medium
+      mb-1
+    `,
+
+    formFieldInput: `
+      bg-[#101010]
+      border border-gray-700
+      text-white
+      h-10
+      rounded-xl
+      px-4
+      focus:border-blue-500
+      focus:ring-1
+      focus:ring-blue-500
+      transition-all
+    `,
+
+    formButtonPrimary: `
+      bg-blue-600
+      hover:bg-blue-500
+      text-white
+      font-semibold
+      h-10
+      rounded-xl
+      transition-all
+      text-sm
+      shadow-lg
+      hover:shadow-blue-500/20
+    `,
+
+    footerActionText: `
+      text-gray-400
+      text-sm
+    `,
+
+    footerActionLink: `
+      text-blue-400
+      hover:text-blue-300
+      font-medium
+      text-sm
+    `,
+
+    identityPreviewText: `text-white`,
+
+    formResendCodeLink: `text-blue-400`,
+
+    otpCodeFieldInput: `
+      bg-[#101010]
+      border border-gray-700
+      text-white
+      rounded-xl
+    `,
+  },
+};
+
 const Login = () => {
   const [activeIndex, setActiveIndex] = useState(0);
 
@@ -23,8 +154,8 @@ const Login = () => {
 
   return (
     <div className='flex min-h-screen'>
-      {/* Left Side */}
-      <div className='hidden md:flex md:w-1/2 bg-black flex-col justify-center items-center p-12 text-white border-r border-gray-800'>
+      {/* Left Side - Branding Panel */}
+      <div className='hidden md:flex md:w-[55%] bg-black flex-col justify-center items-center p-12 text-white border-r border-gray-800'>
         <div className='flex items-center gap-4 mb-6'>
           <img src={assets.logo} alt='SolverCell Logo' className='w-16 h-16 object-contain rounded-full' />
 
@@ -46,7 +177,7 @@ const Login = () => {
           <div className='relative flex items-center justify-center gap-6 w-full max-w-5xl px-4'>
             <button
               onClick={() => setActiveIndex(prev => (prev - 1 + screenshotItems.length) % screenshotItems.length)}
-              className='z-20 p-3 rounded-full bg-zinc-900/80 text-zinc-400 cursor-pointer border border-zinc-800 hover:bg-zinc-800 hover:text-white transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-red-500/50 shrink-0 shadow-lg'
+              className='z-20 p-3 rounded-full bg-zinc-900/80 text-zinc-400 cursor-pointer border border-zinc-800 hover:bg-zinc-800 hover:text-white transition-all duration-300 shrink-0 shadow-lg'
               aria-label='Previous Slide'
             >
               <span className='sr-only'>Previous</span>
@@ -72,7 +203,7 @@ const Login = () => {
 
             <button
               onClick={() => setActiveIndex(prev => (prev + 1) % screenshotItems.length)}
-              className='z-20 p-3 rounded-full bg-zinc-900/80 text-zinc-400 cursor-pointer border border-zinc-800 hover:bg-zinc-800 hover:text-white transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-red-500/50 shrink-0 shadow-lg'
+              className='z-20 p-3 rounded-full bg-zinc-900/80 text-zinc-400 cursor-pointer border border-zinc-800 hover:bg-zinc-800 hover:text-white transition-all duration-300 shrink-0 shadow-lg'
               aria-label='Next Slide'
             >
               <span className='sr-only'>Next</span>
@@ -82,137 +213,14 @@ const Login = () => {
         </div>
       </div>
 
-      {/* Right Side */}
-      <div className='flex w-full md:w-1/2 items-center justify-center bg-[#0a0a0a] p-8'>
+      {/* Right Side - Clerk Auth */}
+      <div className='flex w-full md:w-[45%] items-center justify-center bg-[#0a0a0a] p-8'>
         <SignIn
           routing='path'
           path='/login'
           signUpUrl='/register'
           forceRedirectUrl='/'
-          appearance={{
-            theme: dark,
-
-            variables: {
-              colorPrimary: '#3b82f6',
-              colorBackground: '#121212',
-              colorInputBackground: '#1e1e1e',
-              colorInputText: '#ffffff',
-              colorText: '#ffffff',
-              colorTextSecondary: '#9ca3af',
-              colorNeutral: '#2a2a2a',
-              borderRadius: '12px',
-            },
-
-            elements: {
-              card: `
-                bg-[#181818]
-                border border-gray-800
-                shadow-[0_0_50px_rgba(59,130,246,0.08)]
-                w-full
-                max-w-md
-                p-8
-              `,
-
-              headerTitle: `
-                text-white
-                text-4xl
-                font-bold
-                tracking-tight
-              `,
-
-              headerSubtitle: `
-                text-gray-400
-                text-base
-                mt-2
-              `,
-
-              socialButtonsBlockButton: `
-                bg-[#202020]
-                border border-gray-700
-                hover:bg-[#2a2a2a]
-                text-white
-                transition-all
-                h-12
-                rounded-xl
-              `,
-
-              socialButtonsBlockButtonText: `
-                text-white
-                font-medium
-                text-sm
-              `,
-
-              socialButtonsProviderIcon: `
-                w-5
-                h-5
-              `,
-
-              dividerLine: `
-                bg-gray-800
-              `,
-
-              dividerText: `
-                text-gray-500
-                text-sm
-              `,
-
-              formFieldLabel: `
-                text-gray-300
-                text-sm
-                font-medium
-                mb-2
-              `,
-
-              formFieldInput: `
-                bg-[#101010]
-                border border-gray-700
-                text-white
-                h-12
-                rounded-xl
-                px-4
-                focus:border-blue-500
-                focus:ring-1
-                focus:ring-blue-500
-                transition-all
-              `,
-
-              formButtonPrimary: `
-                bg-blue-600
-                hover:bg-blue-500
-                text-white
-                font-semibold
-                h-12
-                rounded-xl
-                transition-all
-                text-sm
-                shadow-lg
-                hover:shadow-blue-500/20
-              `,
-
-              footerActionText: `
-                text-gray-400
-              `,
-
-              footerActionLink: `
-                text-blue-400
-                hover:text-blue-300
-                font-medium
-              `,
-
-              identityPreviewText: `text-white`,
-
-              formResendCodeLink: `
-                text-blue-400
-              `,
-
-              otpCodeFieldInput: `
-                bg-[#101010]
-                border border-gray-700
-                text-white
-                rounded-xl
-              `,
-            },
-          }}
+          appearance={clerkAppearance}
         />
       </div>
     </div>

@@ -22,34 +22,51 @@ export const navbarItems = [
 
 // ─────────────── TAGS MASTER LIST ──────────────────────────────
 export const ALL_TAGS = [
+  // Basic Data Structures
   'Arrays',
   'Strings',
   'Linked Lists',
-  'Trees',
-  'Graphs',
-  'Dynamic Programming',
-  'Recursion',
-  'Backtracking',
-  'Sorting',
-  'Searching',
-  'Binary Search',
-  'Two Pointers',
-  'Sliding Window',
   'Stack',
   'Queue',
-  'Heap',
+  'Binary Trees',
   'Hash Map',
+  'Heap',
+  'Trees',
+  'Graphs',
+
+  // Common Techniques
+  'Two Pointers',
+  'Sliding Window',
+  'Prefix Sum',
+  'Binary Search',
+  'Recursion',
+  'Backtracking',
   'Greedy',
   'Divide and Conquer',
+
+  // Graph & Tree Algorithms
   'BFS',
   'DFS',
   'Union Find',
+  'Topological Sort',
+  'Shortest Path',
+
+  // Core Algorithms
+  'Sorting',
+  'Searching',
+  'Dynamic Programming',
+
+  // Specialized Topics
   'Bit Manipulation',
   'Math',
   'Simulation',
-  'Merge Sort',
+  'Intervals',
+  'Matrix',
   'Tries',
   'Segment Trees',
+
+  // Misc
+  'Design',
 ];
 
 // ────────────────── DIFFICULTY OPTIONS ───────────────────────────

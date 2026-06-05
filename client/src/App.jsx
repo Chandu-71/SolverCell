@@ -2,6 +2,8 @@ import React from 'react';
 import { Route, Routes, Navigate } from 'react-router-dom';
 import { Show, useAuth } from '@clerk/react';
 
+import useSocket from './hooks/useSocket';
+
 import SyncUser from './components/SyncUser';
 
 import Home from './pages/Home';
@@ -18,10 +20,21 @@ import Leaderboard from './pages/Leaderboard';
 import NotFound from './pages/NotFound';
 import Loading from './components/Loading';
 
-import useSocket from './hooks/useSocket';
+const ProtectedRoute = ({ children }) => (
+  <Show when='signed-in' fallback={<Navigate to='/login' replace />}>
+    {children}
+  </Show>
+);
+
+const PublicRoute = ({ children }) => (
+  <Show when='signed-out' fallback={<Navigate to='/' replace />}>
+    {children}
+  </Show>
+);
 
 const App = () => {
   const { isLoaded } = useAuth();
+
   useSocket(); // initialize global socket connection
 
   if (!isLoaded) {
@@ -36,18 +49,18 @@ const App = () => {
         <Route
           path='/login/*'
           element={
-            <Show when='signed-out' fallback={<Navigate to='/' replace />}>
+            <PublicRoute>
               <Login />
-            </Show>
+            </PublicRoute>
           }
         />
 
         <Route
           path='/register/*'
           element={
-            <Show when='signed-out' fallback={<Navigate to='/' replace />}>
+            <PublicRoute>
               <Register />
-            </Show>
+            </PublicRoute>
           }
         />
 
@@ -55,90 +68,90 @@ const App = () => {
         <Route
           path='/'
           element={
-            <Show when='signed-in' fallback={<Navigate to='/login' replace />}>
+            <ProtectedRoute>
               <Home />
-            </Show>
+            </ProtectedRoute>
           }
         />
 
         <Route
           path='/problem/:problemId'
           element={
-            <Show when='signed-in' fallback={<Navigate to='/login' replace />}>
+            <ProtectedRoute>
               <Workspace />
-            </Show>
+            </ProtectedRoute>
           }
         />
 
         <Route
           path='/messages'
           element={
-            <Show when='signed-in' fallback={<Navigate to='/login' replace />}>
+            <ProtectedRoute>
               <Messages />
-            </Show>
+            </ProtectedRoute>
           }
         />
 
         <Route
           path='/messages/:id'
           element={
-            <Show when='signed-in' fallback={<Navigate to='/login' replace />}>
+            <ProtectedRoute>
               <Messages />
-            </Show>
+            </ProtectedRoute>
           }
         />
 
         <Route
           path='/discover'
           element={
-            <Show when='signed-in' fallback={<Navigate to='/login' replace />}>
+            <ProtectedRoute>
               <Discover />
-            </Show>
+            </ProtectedRoute>
           }
         />
 
         <Route
           path='/notifications'
           element={
-            <Show when='signed-in' fallback={<Navigate to='/login' replace />}>
+            <ProtectedRoute>
               <Notifications />
-            </Show>
+            </ProtectedRoute>
           }
         />
 
         <Route
           path='/leaderboard'
           element={
-            <Show when='signed-in' fallback={<Navigate to='/login' replace />}>
+            <ProtectedRoute>
               <Leaderboard />
-            </Show>
+            </ProtectedRoute>
           }
         />
 
         <Route
           path='/profile'
           element={
-            <Show when='signed-in' fallback={<Navigate to='/login' replace />}>
+            <ProtectedRoute>
               <Profile />
-            </Show>
+            </ProtectedRoute>
           }
         />
 
         <Route
           path='/profile/:username'
           element={
-            <Show when='signed-in' fallback={<Navigate to='/login' replace />}>
+            <ProtectedRoute>
               <Profile />
-            </Show>
+            </ProtectedRoute>
           }
         />
 
         <Route
           path='/create'
           element={
-            <Show when='signed-in' fallback={<Navigate to='/login' replace />}>
+            <ProtectedRoute>
               <CreateProblem />
-            </Show>
+            </ProtectedRoute>
           }
         />
 
