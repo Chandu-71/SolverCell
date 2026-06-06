@@ -1,7 +1,7 @@
 import express from 'express';
 import prisma from '../lib/prisma.js';
 import asyncHandler from '../middleware/asyncHandler.js';
-import { getAuth } from '../middleware/auth.js';
+import { getAuth } from '@clerk/express';
 
 const router = express.Router();
 

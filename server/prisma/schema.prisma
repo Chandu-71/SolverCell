@@ -10,13 +10,10 @@ datasource db {
 
 // ══════════════════════════════════════════════
 //  USER
-//  clerkId is the bridge to Clerk.
-//  Created automatically when user first signs in
-//  via the /api/users/sync endpoint.
 // ══════════════════════════════════════════════
 model User {
   id          String   @id @default(cuid())
-  clerkId     String   @unique // from Clerk JWT — never changes
+  clerkId     String   @unique
   username    String   @unique
   displayName String
   email       String
@@ -26,7 +23,7 @@ model User {
   joinedAt    DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  // stats (updated on solve events)
+  // stats
   eloRating     Int       @default(0)
   currentStreak Int       @default(0)
   longestStreak Int       @default(0)
@@ -34,7 +31,7 @@ model User {
 
   // leaderboard
   weeklyScore   Int       @default(0)
-  bestRank      Int?                   // best weekly leaderboard rank ever achieved
+  bestRank      Int? // best weekly leaderboard rank ever achieved
 
   // relations
   problems       Problem[]
@@ -46,8 +43,8 @@ model User {
   notifications  Notification[]  @relation("recipient")
   solvedProblems SolvedProblem[]
   bookmarks      Bookmark[]
-  conversations ConversationParticipant[]
-  sentMessages  Message[]
+  conversations  ConversationParticipant[]
+  sentMessages   Message[]
 
   @@index([clerkId])
   @@index([username])
@@ -55,22 +52,19 @@ model User {
 
 // ══════════════════════════════════════════════
 //  PROBLEM
-//  The "post" of your platform
 // ══════════════════════════════════════════════
 model Problem {
   id          String     @id @default(cuid())
   authorId    String // FK → User.id
   slug        String     @unique
   title       String
-  summary     String // feed preview teaser
+  summary     String
   description String     @db.Text // full markdown
   difficulty  Difficulty
   constraints String?    @db.Text
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 
-  // counters — denormalized for fast feed queries
-  // incremented by your API on each event, no joins needed
   likesCount       Int @default(0)
   totalAttempts    Int @default(0)
   successfulSolves Int @default(0)
@@ -95,8 +89,6 @@ model Problem {
 
 // ══════════════════════════════════════════════
 //  TAG
-//  Normalized tag table.
-//  ProblemTag is the join table.
 // ══════════════════════════════════════════════
 model Tag {
   id       String       @id @default(cuid())
@@ -104,6 +96,9 @@ model Tag {
   problems ProblemTag[]
 }
 
+// ══════════════════════════════════════════════
+// ProblemTag is a join table that connects Problems and Tags in a many-to-many relationship
+// ══════════════════════════════════════════════
 model ProblemTag {
   problemId String
   tagId     String
@@ -127,8 +122,7 @@ model Bookmark {
 
 // ══════════════════════════════════════════════
 //  TEST CASE
-//  stdin / stdout format — works for every
-//  problem type (DSA, math, aptitude)
+//  stdin / stdout format
 // ══════════════════════════════════════════════
 model TestCase {
   id             String  @id @default(cuid())
@@ -218,8 +212,8 @@ model Comment {
 
 // ══════════════════════════════════════════════
 //  NOTIFICATION
-//  Covers: new follower, like on your problem,
-//          comment on your problem, new submission result
+//  Covers: new follower, like on user problem,
+//          comment on user problem, new submission result
 // ══════════════════════════════════════════════
 model Notification {
   id          String           @id @default(cuid())
@@ -263,7 +257,7 @@ model Conversation {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   lastMessageAt DateTime?
-  lastMessagePreview String? // "Hey, check this problem..." — for sidebar
+  lastMessagePreview String? // "Hey, check this problem..." — for messageSidebar
 
   participants ConversationParticipant[]
   messages     Message[]

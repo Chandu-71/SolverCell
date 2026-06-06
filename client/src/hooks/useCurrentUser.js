@@ -7,7 +7,7 @@ const useCurrentUser = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // useCallback so the function reference is stable — safe to put in useEffect deps
+  // useCallback so the function reference is stable
   const fetchUser = useCallback(async () => {
     try {
       const token = await getToken();

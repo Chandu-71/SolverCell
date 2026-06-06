@@ -1,7 +1,7 @@
 import express from 'express';
 import asyncHandler from '../middleware/asyncHandler.js';
 import prisma from '../lib/prisma.js';
-import { getAuth } from '../middleware/auth.js';
+import { getAuth } from '@clerk/express';
 import { notify } from '../lib/notify.js';
 import { handleFirstSolve } from '../lib/solveRewards.js';
 

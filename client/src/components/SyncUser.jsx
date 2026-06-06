@@ -20,17 +20,16 @@ const SyncUser = () => {
         body: JSON.stringify({
           username: user.username || user.id,
           email: user.primaryEmailAddress?.emailAddress,
-          displayName: user.fullName || user.firstName,
+          displayName: user.fullName || user.firstName || user.primaryEmailAddress?.emailAddress?.split('@')[0] || 'Anonymous User',
           avatarUrl: user.imageUrl,
         }),
       });
 
       const data = await res.json();
-      console.log(data);
     };
 
     syncUser();
-  }, [user]);
+  }, [user, getToken]);
 
   return null;
 };

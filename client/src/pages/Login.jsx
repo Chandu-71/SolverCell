@@ -215,13 +215,7 @@ const Login = () => {
 
       {/* Right Side - Clerk Auth */}
       <div className='flex w-full md:w-[45%] items-center justify-center bg-[#0a0a0a] p-8'>
-        <SignIn
-          routing='path'
-          path='/login'
-          signUpUrl='/register'
-          forceRedirectUrl='/'
-          appearance={clerkAppearance}
-        />
+        <SignIn routing='path' path='/login' signUpUrl='/register' forceRedirectUrl='/' appearance={clerkAppearance} />
       </div>
     </div>
   );
