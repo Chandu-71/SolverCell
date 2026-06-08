@@ -10,7 +10,7 @@ const BasicInfoSection = ({ title, setTitle, summary, setSummary, difficulty, se
   return (
     <>
       {/* ── SECTION 1: BASICS ── */}
-      <Section number='1' title='Problem basics' subtitle='Give your problem a clear, specific title and set its difficulty.'>
+      <Section number='1' title='Problem basics' subtitle='Give your problem a clear, specific title.'>
         <div className='space-y-5'>
           <Field label='Title' required hint={`${titleLeft} left`} error={errors.title}>
             <input
@@ -18,7 +18,7 @@ const BasicInfoSection = ({ title, setTitle, summary, setSummary, difficulty, se
               onChange={e => setTitle(e.target.value)}
               maxLength={150}
               placeholder='e.g. "Find the Longest Increasing Subsequence"'
-              className={`${inputCls} ${errors.title ? 'border-red-500/50' : ''}`}
+              className={`${inputCls} ${errors.title && 'border-red-500/50'}`}
             />
           </Field>
 
@@ -38,12 +38,7 @@ const BasicInfoSection = ({ title, setTitle, summary, setSummary, difficulty, se
       </Section>
 
       {/* ── SECTION 2: FEED PREVIEW ── */}
-      <Section
-        number='2'
-        title='Feed preview'
-        subtitle='This is the short teaser users see in the feed before opening your problem.'
-        error={errors.summary}
-      >
+      <Section number='2' title='Feed preview' subtitle='A short teaser users see in the feed before opening your problem.' error={errors.summary}>
         <Field label='Summary' required hint={`${summaryLeft} left`}>
           <textarea
             value={summary}
@@ -51,7 +46,7 @@ const BasicInfoSection = ({ title, setTitle, summary, setSummary, difficulty, se
             rows={4}
             maxLength={280}
             placeholder='Hook the solver. Why is this problem interesting, tricky, or satisfying?'
-            className={`${inputCls} resize-none leading-relaxed ${errors.summary ? 'border-red-500/50' : ''}`}
+            className={`${inputCls} resize-none leading-relaxed ${errors.summary && 'border-red-500/50'}`}
           />
         </Field>
       </Section>

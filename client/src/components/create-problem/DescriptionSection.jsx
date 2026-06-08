@@ -2,23 +2,16 @@ import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkBreaks from 'remark-breaks';
-import { Section, Field, inputCls } from './Shared';
 
-const MarkdownHint = () => (
-  <div className='flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-600'>
-    {[
-      ['**bold**', 'bold'],
-      ['*italic*', 'italic'],
-      ['`code`', 'code'],
-      ['```block```', 'code block'],
-      ['- item', 'list'],
-    ].map(([syntax, label]) => (
-      <span key={label}>
-        <code className='text-slate-500'>{syntax}</code> → {label}
-      </span>
-    ))}
-  </div>
-);
+import { Section, inputCls } from './Shared';
+
+const MARKDOWN_HINTS = [
+  ['**bold**', 'bold'],
+  ['*italic*', 'italic'],
+  ['`code`', 'code'],
+  ['```block```', 'code block'],
+  ['- item', 'list'],
+];
 
 const PREVIEW_PROSE =
   'prose prose-invert max-w-none flex-1 overflow-y-auto p-4 ' +
@@ -36,7 +29,7 @@ const DescriptionSection = ({ description, setDescription, constraints, setConst
       {/* ── SECTION 3: DESCRIPTION ── */}
       <Section number='3' title='Description' subtitle='Explain the problem fully. Use markdown for formatting.' error={errors.description}>
         <div
-          className={`flex h-138 flex-col overflow-hidden rounded-xl border bg-[#141414] transition-colors focus-within:border-slate-500/50 ${
+          className={`flex h-138 flex-col overflow-hidden rounded-xl border bg-[#141414] transition-colors focus-within:border-red-500/40 ${
             errors.description ? 'border-red-500/50' : 'border-white/8'
           }`}
         >
@@ -64,11 +57,17 @@ const DescriptionSection = ({ description, setDescription, constraints, setConst
               <textarea
                 value={description}
                 onChange={e => setDescription(e.target.value)}
-                placeholder={`Describe the problem clearly.\n\nInclude:\n- Problem statement\n- Input format\n- Output format\n- Examples\n- Constraints`}
+                placeholder={`Describe the problem clearly.\n\nInclude:\nProblem statement\nInput format\nOutput format\nExamples`}
                 className='w-full flex-1 resize-none bg-transparent p-4 font-mono text-sm leading-relaxed text-slate-200 outline-none placeholder:text-slate-600'
               />
               <div className='border-t border-white/6 bg-[#0b0b0b] px-4 py-2.5'>
-                <MarkdownHint />
+                <div className='flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-600'>
+                  {MARKDOWN_HINTS.map(([syntax, label]) => (
+                    <span key={label}>
+                      <code className='text-slate-500'>{syntax}</code> → {label}
+                    </span>
+                  ))}
+                </div>
               </div>
             </>
           ) : (
@@ -91,7 +90,7 @@ const DescriptionSection = ({ description, setDescription, constraints, setConst
           value={constraints}
           onChange={e => setConstraints(e.target.value)}
           rows={4}
-          placeholder={'- 1 ≤ nums.length ≤ 10⁴\n- -10⁹ ≤ nums[i] ≤ 10⁹\n- Time limit: 2 seconds'}
+          placeholder={'1 <= T <= 45\n1 <= nums.length <= 10^4'}
           className={`${inputCls} resize-none font-mono text-sm`}
         />
       </Section>

@@ -17,15 +17,15 @@ const slugify = str =>
     .replace(/[^a-z0-9\s-]/g, '')
     .replace(/\s+/g, '-');
 
-const validate = ({ title, summary, description, tags, visibleTCs, hiddenTCs }) => {
+const validate = ({ title, summary, description, tags, visibleTC, hiddenTCs }) => {
   const e = {};
   if (!title.trim()) e.title = 'Title is required';
-  if (title.length > 150) e.title = 'Max 150 characters';
+  if (title.trim().length > 150) e.title = 'Max 150 characters';
   if (!summary.trim()) e.summary = 'Summary is required';
-  if (summary.length > 280) e.summary = 'Max 280 characters';
+  if (summary.trim().length > 280) e.summary = 'Max 280 characters';
   if (!description.trim()) e.description = 'Description is required';
   if (tags.length === 0) e.tags = 'Add at least one tag';
-  if (!visibleTCs[0]?.input.trim() || !visibleTCs[0]?.output.trim()) {
+  if (!visibleTC.input.trim() || !visibleTC.output.trim()) {
     e.testcases = 'The visible test case needs both input and output';
   }
   const hiddenFilled = hiddenTCs.filter(tc => tc.input.trim() || tc.output.trim());
@@ -49,7 +49,7 @@ const CreateProblemPage = () => {
   const [difficulty, setDifficulty] = useState('Medium');
   const [tags, setTags] = useState([]);
   const [constraints, setConstraints] = useState('');
-  const [visibleTCs, setVisibleTCs] = useState([{ id: uid(), input: '', output: '' }]);
+  const [visibleTC, setVisibleTC] = useState({ id: uid(), input: '', output: '' });
   const [hiddenTCs, setHiddenTCs] = useState([{ id: uid(), input: '', output: '' }]);
 
   const [submitting, setSubmitting] = useState(false);
@@ -58,7 +58,7 @@ const CreateProblemPage = () => {
 
   // ── submit ──────────────────────────────────────────────────
   const handleSubmit = async () => {
-    const e = validate({ title, summary, description, tags, visibleTCs, hiddenTCs });
+    const e = validate({ title, summary, description, tags, visibleTC, hiddenTCs });
     setErrors(e);
 
     if (Object.keys(e).length > 0) return;
@@ -81,8 +81,8 @@ const CreateProblemPage = () => {
         testCases: [
           {
             label: 'Example',
-            input: visibleTCs[0].input.trim(),
-            expectedOutput: visibleTCs[0].output.trim(),
+            input: visibleTC.input.trim(),
+            expectedOutput: visibleTC.output.trim(),
           },
         ],
 
@@ -107,17 +107,16 @@ const CreateProblemPage = () => {
 
       if (!data.success) {
         alert(data.message || 'Failed to create problem');
-        setSubmitting(false);
         return;
       }
 
-      setSubmitting(false);
       setSubmitted(true);
 
       setTimeout(() => navigate('/'), 1200);
     } catch (error) {
       console.error(error);
       alert('Something went wrong');
+    } finally {
       setSubmitting(false);
     }
   };
@@ -145,7 +144,7 @@ const CreateProblemPage = () => {
         <div className='mx-auto max-w-3xl px-6 py-10'>
           <div className='mb-8'>
             <h1 className='text-2xl font-bold text-white'>Post a Problem</h1>
-            <p className='mt-1 text-sm text-slate-500'>Share a coding challenge, math puzzle, or aptitude question with the community.</p>
+            <p className='mt-1 text-sm text-slate-500'>Share a coding challenge with the community.</p>
           </div>
 
           <div className='space-y-5'>
@@ -169,13 +168,7 @@ const CreateProblemPage = () => {
               errors={errors}
             />
 
-            <TestCasesSection
-              visibleTCs={visibleTCs}
-              setVisibleTCs={setVisibleTCs}
-              hiddenTCs={hiddenTCs}
-              setHiddenTCs={setHiddenTCs}
-              errors={errors}
-            />
+            <TestCasesSection visibleTC={visibleTC} setVisibleTC={setVisibleTC} hiddenTCs={hiddenTCs} setHiddenTCs={setHiddenTCs} errors={errors} />
 
             {/* ── SUBMIT ── */}
             <div className='flex items-center justify-between pb-10 pt-2'>

@@ -127,13 +127,29 @@ router.post(
 
     const { title, slug, summary, description, difficulty, tags, constraints, testCases, hiddenTestCases } = req.body;
 
-    const visibleCases = Array.isArray(testCases) ? testCases.filter(tc => tc.input?.trim() && tc.expectedOutput?.trim()) : [];
+    const visibleTestCases = Array.isArray(testCases) ? testCases : [];
+    const visiblePresent = visibleTestCases.filter(tc => tc.input?.trim() || tc.expectedOutput?.trim());
+    const visibleCases = visiblePresent.filter(tc => tc.input?.trim() && tc.expectedOutput?.trim());
     const hiddenCases = Array.isArray(hiddenTestCases) ? hiddenTestCases.filter(tc => tc.input?.trim() && tc.expectedOutput?.trim()) : [];
 
-    if (visibleCases.length === 0) {
+    if (visiblePresent.length === 0) {
       return res.status(400).json({
         success: false,
-        message: 'At least one visible test case with input and output is required',
+        message: 'A visible test case with input and output is required',
+      });
+    }
+
+    if (visiblePresent.length > 1) {
+      return res.status(400).json({
+        success: false,
+        message: 'Only one visible test case is allowed',
+      });
+    }
+
+    if (visibleCases.length !== 1) {
+      return res.status(400).json({
+        success: false,
+        message: 'The visible test case needs both input and output',
       });
     }
 
@@ -180,7 +196,7 @@ router.post(
               });
 
               if (!tag) {
-                tag = await prisma.tag.create({
+                tag = ({
                   data: { name: tagName },
                 });
               }

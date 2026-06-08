@@ -3,14 +3,14 @@ import { AlertCircle } from 'lucide-react';
 // ─── Shared style constants ───────────────────────────────────
 export const DIFF_STYLE = {
   Easy: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400',
-  Medium: 'border-amber-500/30   bg-amber-500/10   text-amber-400',
+  Medium: 'border-amber-500/30 bg-amber-500/10   text-amber-400',
   Hard: 'border-red-500/30     bg-red-500/10     text-red-400',
 };
 
 export const inputCls =
   'w-full rounded-xl border border-white/8 bg-[#141414] px-4 py-3 text-sm text-white placeholder-slate-600 outline-none transition focus:border-red-500/40 focus:ring-1 focus:ring-red-500/10';
 
-export const uid = () => Math.random().toString(36).slice(2, 8);
+export const uid = () => crypto.randomUUID();
 
 // ─── Section ─────────────────────────────────────────────────
 export const Section = ({ number, title, subtitle, children, error }) => (
