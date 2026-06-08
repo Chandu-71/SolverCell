@@ -6,7 +6,7 @@ import Loading from '../components/Loading';
 export const CurrentUserContext = createContext(null);
 
 export const CurrentUserProvider = ({ children }) => {
-  const { isLoaded, isSignedIn } = useAuth();
+  const { isLoaded, isSignedIn, signOut } = useAuth();
   const { isLoaded: userLoaded, user: clerkUser } = useUser();
   const { isLoaded: sessionLoaded, session } = useSession();
 
@@ -28,7 +28,7 @@ export const CurrentUserProvider = ({ children }) => {
 
     let cancelled = false;
 
-    const syncUser = async () => {
+    const performSync = async (retryCount = 0) => {
       try {
         const token = await session.getToken();
         if (!token || cancelled) return;
@@ -42,11 +42,7 @@ export const CurrentUserProvider = ({ children }) => {
           body: JSON.stringify({
             username: clerkUser.username || clerkUser.id,
             email: clerkUser.primaryEmailAddress?.emailAddress,
-            displayName:
-              clerkUser.fullName ||
-              clerkUser.firstName ||
-              clerkUser.primaryEmailAddress?.emailAddress?.split('@')[0] ||
-              'Anonymous User',
+            displayName: clerkUser.fullName || clerkUser.firstName || clerkUser.primaryEmailAddress?.emailAddress?.split('@')[0] || 'Anonymous User',
             avatarUrl: clerkUser.imageUrl,
           }),
         });
@@ -54,7 +50,18 @@ export const CurrentUserProvider = ({ children }) => {
         if (cancelled) return;
 
         if (!res.ok) {
-          console.error('User sync failed during startup:', res.status);
+          console.error(`User sync failed (Attempt ${retryCount + 1}):`, res.status);
+
+          // If 401 right after login, Retry once after a short delay.
+          if (res.status === 401 && retryCount < 2) {
+            console.log('Retrying user sync due to 401...');
+            setTimeout(() => {
+              if (!cancelled) performSync(retryCount + 1);
+            }, 1000);
+            return; // Wait for the retry to finish
+          }
+
+          setIsReady(true);
           return;
         }
 
@@ -62,6 +69,7 @@ export const CurrentUserProvider = ({ children }) => {
 
         if (!data.success) {
           console.error('User sync responded with failure:', data);
+          setIsReady(true);
           return;
         }
 
@@ -70,11 +78,12 @@ export const CurrentUserProvider = ({ children }) => {
       } catch (err) {
         if (!cancelled) {
           console.error('User sync error during startup:', err);
+          setIsReady(true);
         }
       }
     };
 
-    syncUser();
+    performSync();
 
     return () => {
       cancelled = true;
@@ -110,9 +119,5 @@ export const CurrentUserProvider = ({ children }) => {
     return <Loading />;
   }
 
-  return (
-    <CurrentUserContext.Provider value={{ user, isReady, setUser, refetch }}>
-      {children}
-    </CurrentUserContext.Provider>
-  );
+  return <CurrentUserContext.Provider value={{ user, isReady, setUser, refetch }}>{children}</CurrentUserContext.Provider>;
 };
