@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { useAuth } from '@clerk/react';
+import { useAuth, useSession } from '@clerk/react';
 import useSocket from './useSocket';
+import useCurrentUser from './useCurrentUser';
 
 let globalCount = 0;
 let listeners = [];
@@ -16,13 +17,20 @@ const setGlobalCount = value => {
   emit();
 };
 
+export const resetNotificationCount = () => {
+  initialized = false;
+  globalCount = 0;
+  emit();
+};
+
 const useNotificationCount = () => {
-  const { getToken } = useAuth();
+  const { isSignedIn } = useAuth();
+  const { session } = useSession();
+  const { isReady } = useCurrentUser();
   const socket = useSocket();
 
   const [count, setCount] = useState(globalCount);
 
-  // subscribe to shared state
   useEffect(() => {
     listeners.push(setCount);
 
@@ -31,13 +39,19 @@ const useNotificationCount = () => {
     };
   }, []);
 
-  // fetch only once globally
   useEffect(() => {
-    if (initialized) return;
+    if (!isSignedIn) {
+      resetNotificationCount();
+    }
+  }, [isSignedIn]);
+
+  useEffect(() => {
+    if (!isReady || initialized || !isSignedIn || !session) return;
 
     const fetchCount = async () => {
       try {
-        const token = await getToken();
+        const token = await session.getToken();
+        if (!token) return;
 
         const res = await fetch(`${import.meta.env.VITE_API_URL}/api/notifications`, {
           headers: {
@@ -45,23 +59,26 @@ const useNotificationCount = () => {
           },
         });
 
+        if (!res.ok) {
+          console.error('useNotificationCount fetch failed:', res.status);
+          return;
+        }
+
         const data = await res.json();
 
         if (data.success) {
           const unread = data.notifications.filter(n => !n.read).length;
-
           setGlobalCount(unread);
+          initialized = true;
         }
       } catch (err) {
-        console.error(err);
+        console.error('useNotificationCount fetch error:', err);
       }
     };
 
-    initialized = true;
     fetchCount();
-  }, []);
+  }, [isReady, isSignedIn, session]);
 
-  // bind socket listener ONLY ONCE
   useEffect(() => {
     if (socketBound) return;
 
@@ -77,7 +94,7 @@ const useNotificationCount = () => {
       socket.off('notification:new', onNewNotification);
       socketBound = false;
     };
-  }, []);
+  }, [socket]);
 
   return {
     count,

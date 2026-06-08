@@ -1,10 +1,8 @@
 import React from 'react';
 import { Route, Routes, Navigate } from 'react-router-dom';
-import { Show, useAuth } from '@clerk/react';
+import { Show } from '@clerk/react';
 
 import useSocket from './hooks/useSocket';
-
-import SyncUser from './components/SyncUser';
 
 import Home from './pages/Home';
 import Login from './pages/Login';
@@ -18,7 +16,6 @@ import Workspace from './pages/Workspace';
 import Leaderboard from './pages/Leaderboard';
 
 import NotFound from './pages/NotFound';
-import Loading from './components/Loading';
 
 const ProtectedRoute = ({ children }) => (
   <Show when='signed-in' fallback={<Navigate to='/login' replace />}>
@@ -33,132 +30,123 @@ const PublicRoute = ({ children }) => (
 );
 
 const App = () => {
-  const { isLoaded } = useAuth();
-
-  useSocket(); // initialize global socket connection
-
-  if (!isLoaded) {
-    return <Loading />;
-  }
+  useSocket();
 
   return (
-    <>
-      <SyncUser /> {/* background sync */}
-      <Routes>
-        {/* PUBLIC ROUTES */}
-        <Route
-          path='/login/*'
-          element={
-            <PublicRoute>
-              <Login />
-            </PublicRoute>
-          }
-        />
+    <Routes>
+      {/* PUBLIC ROUTES */}
+      <Route
+        path='/login/*'
+        element={
+          <PublicRoute>
+            <Login />
+          </PublicRoute>
+        }
+      />
 
-        <Route
-          path='/register/*'
-          element={
-            <PublicRoute>
-              <Register />
-            </PublicRoute>
-          }
-        />
+      <Route
+        path='/register/*'
+        element={
+          <PublicRoute>
+            <Register />
+          </PublicRoute>
+        }
+      />
 
-        {/* PROTECTED ROUTES */}
-        <Route
-          path='/'
-          element={
-            <ProtectedRoute>
-              <Home />
-            </ProtectedRoute>
-          }
-        />
+      {/* PROTECTED ROUTES */}
+      <Route
+        path='/'
+        element={
+          <ProtectedRoute>
+            <Home />
+          </ProtectedRoute>
+        }
+      />
 
-        <Route
-          path='/problem/:problemId'
-          element={
-            <ProtectedRoute>
-              <Workspace />
-            </ProtectedRoute>
-          }
-        />
+      <Route
+        path='/problem/:problemId'
+        element={
+          <ProtectedRoute>
+            <Workspace />
+          </ProtectedRoute>
+        }
+      />
 
-        <Route
-          path='/messages'
-          element={
-            <ProtectedRoute>
-              <Messages />
-            </ProtectedRoute>
-          }
-        />
+      <Route
+        path='/messages'
+        element={
+          <ProtectedRoute>
+            <Messages />
+          </ProtectedRoute>
+        }
+      />
 
-        <Route
-          path='/messages/:id'
-          element={
-            <ProtectedRoute>
-              <Messages />
-            </ProtectedRoute>
-          }
-        />
+      <Route
+        path='/messages/:id'
+        element={
+          <ProtectedRoute>
+            <Messages />
+          </ProtectedRoute>
+        }
+      />
 
-        <Route
-          path='/discover'
-          element={
-            <ProtectedRoute>
-              <Discover />
-            </ProtectedRoute>
-          }
-        />
+      <Route
+        path='/discover'
+        element={
+          <ProtectedRoute>
+            <Discover />
+          </ProtectedRoute>
+        }
+      />
 
-        <Route
-          path='/notifications'
-          element={
-            <ProtectedRoute>
-              <Notifications />
-            </ProtectedRoute>
-          }
-        />
+      <Route
+        path='/notifications'
+        element={
+          <ProtectedRoute>
+            <Notifications />
+          </ProtectedRoute>
+        }
+      />
 
-        <Route
-          path='/leaderboard'
-          element={
-            <ProtectedRoute>
-              <Leaderboard />
-            </ProtectedRoute>
-          }
-        />
+      <Route
+        path='/leaderboard'
+        element={
+          <ProtectedRoute>
+            <Leaderboard />
+          </ProtectedRoute>
+        }
+      />
 
-        <Route
-          path='/profile'
-          element={
-            <ProtectedRoute>
-              <Profile />
-            </ProtectedRoute>
-          }
-        />
+      <Route
+        path='/profile'
+        element={
+          <ProtectedRoute>
+            <Profile />
+          </ProtectedRoute>
+        }
+      />
 
-        <Route
-          path='/profile/:username'
-          element={
-            <ProtectedRoute>
-              <Profile />
-            </ProtectedRoute>
-          }
-        />
+      <Route
+        path='/profile/:username'
+        element={
+          <ProtectedRoute>
+            <Profile />
+          </ProtectedRoute>
+        }
+      />
 
-        <Route
-          path='/create'
-          element={
-            <ProtectedRoute>
-              <CreateProblem />
-            </ProtectedRoute>
-          }
-        />
+      <Route
+        path='/create'
+        element={
+          <ProtectedRoute>
+            <CreateProblem />
+          </ProtectedRoute>
+        }
+      />
 
-        {/* NOT FOUND */}
-        <Route path='*' element={<NotFound />} />
-      </Routes>
-    </>
+      {/* NOT FOUND */}
+      <Route path='*' element={<NotFound />} />
+    </Routes>
   );
 };
 

@@ -6,6 +6,20 @@ import asyncHandler from '../middleware/asyncHandler.js';
 
 const router = express.Router();
 
+const enrichUser = async user => {
+  const [aboveMe, aboveMeWeekly] = await Promise.all([
+    prisma.user.count({ where: { eloRating: { gt: user.eloRating } } }),
+    prisma.user.count({ where: { weeklyScore: { gt: user.weeklyScore } } }),
+  ]);
+
+  return {
+    ...user,
+    currentStreak: getActiveStreak(user.currentStreak, user.lastSolvedAt),
+    currentRank: aboveMe + 1,
+    weeklyRank: aboveMeWeekly + 1,
+  };
+};
+
 router.post(
   '/sync',
   asyncHandler(async (req, res) => {
@@ -47,7 +61,7 @@ router.post(
 
     res.json({
       success: true,
-      user,
+      user: await enrichUser(user),
     });
   }),
 );
@@ -75,22 +89,9 @@ router.get(
       });
     }
 
-    // Compute current all-time rank (by ELO) and current weekly rank
-    const [aboveMe, aboveMeWeekly] = await Promise.all([
-      prisma.user.count({ where: { eloRating: { gt: user.eloRating } } }),
-      prisma.user.count({ where: { weeklyScore: { gt: user.weeklyScore } } }),
-    ]);
-    const currentRank = aboveMe + 1;
-    const weeklyRank = aboveMeWeekly + 1;
-
     res.json({
       success: true,
-      user: {
-        ...user,
-        currentStreak: getActiveStreak(user.currentStreak, user.lastSolvedAt),
-        currentRank,
-        weeklyRank,
-      },
+      user: await enrichUser(user),
     });
   }),
 );
