@@ -7,6 +7,7 @@ import { createServer } from 'http';
 import { Server } from 'socket.io';
 
 import prisma from './lib/prisma.js';
+import { getWeekStart } from './lib/Solverewards.js';
 
 import errorHandler from './middleware/errorHandler.js';
 import { clerkMiddleware } from '@clerk/express';
@@ -177,25 +178,37 @@ app.get('/health', (_, res) => res.json({ status: 'ok' }));
 
 app.use(errorHandler);
 
-server.listen(PORT, () => {
+server.listen(PORT, async () => {
   console.log(`Server running on http://localhost:${PORT}`);
+  await finalizePreviousWeek();
 });
 
-// ── Cron job: Monday 00:00 — lock best ranks, then reset weekly scores ──
-cron.schedule('0 0 * * 1', async () => {
-  console.log('[cron] Weekly reset starting…');
+const finalizePreviousWeek = async () => {
+  console.log('[weekly] Finalizing previous week leaderboard…');
+  const currentWeekStart = getWeekStart(new Date());
+
+  const staleUserCount = await prisma.user.count({
+    where: {
+      OR: [{ weeklyScoreWeekStart: null }, { weeklyScoreWeekStart: { lt: currentWeekStart } }],
+    },
+  });
+
+  if (staleUserCount === 0) {
+    return;
+  }
+
+  console.log(`[weekly] Detected ${staleUserCount} stale weekly users; finalizing previous week.`);
 
   try {
-    // ── Phase 1: update bestRank ──────────────────────────────
-    // Only consider users who actually participated this week.
-    // weeklyScore === 0 means they didn't solve anything — skip them.
     const participants = await prisma.user.findMany({
-      where: { weeklyScore: { gt: 0 } },
+      where: {
+        OR: [{ weeklyScoreWeekStart: null }, { weeklyScoreWeekStart: { lt: currentWeekStart } }],
+        weeklyScore: { gt: 0 },
+      },
       orderBy: [{ weeklyScore: 'desc' }, { username: 'asc' }],
       select: { id: true, weeklyScore: true, bestRank: true },
     });
 
-    // Assign weekly ranks and collect updates for anyone who improved
     const bestRankUpdates = participants
       .map((user, idx) => {
         const weeklyRank = idx + 1;
@@ -211,16 +224,23 @@ cron.schedule('0 0 * * 1', async () => {
 
     if (bestRankUpdates.length > 0) {
       await prisma.$transaction(bestRankUpdates);
-      console.log(`[cron] bestRank updated for ${bestRankUpdates.length} users`);
+      console.log(`[weekly] bestRank updated for ${bestRankUpdates.length} users`);
     }
 
-    // ── Phase 2: reset ALL weeklyScores ──────────────────────
     const { count } = await prisma.user.updateMany({
-      data: { weeklyScore: 0 },
+      where: {
+        OR: [{ weeklyScoreWeekStart: null }, { weeklyScoreWeekStart: { lt: currentWeekStart } }],
+      },
+      data: {
+        weeklyScore: 0,
+        weeklyScoreWeekStart: currentWeekStart,
+      },
     });
 
-    console.log(`[cron] Weekly reset done — ${count} scores reset`);
+    console.log(`[weekly] Reset ${count} stale weekly scores and marked current week.`);
   } catch (err) {
-    console.error('[cron] Weekly reset failed:', err);
+    console.error('[weekly] Finalization failed:', err);
   }
-});
+};
+
+cron.schedule('0 0 * * 1', finalizePreviousWeek);

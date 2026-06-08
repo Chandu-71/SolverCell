@@ -12,6 +12,16 @@ const startOfDay = date => {
   return d;
 };
 
+export const getWeekStart = date => {
+  const d = new Date(date);
+  const day = d.getDay(); // 0 = Sunday, 1 = Monday
+  const daysSinceMonday = (day + 6) % 7;
+  d.setDate(d.getDate() - daysSinceMonday);
+  d.setHours(0, 0, 0, 0);
+  d.setMilliseconds(0);
+  return d;
+};
+
 const daysBetween = (a, b) => {
   const msPerDay = 1000 * 60 * 60 * 24;
   return Math.floor((startOfDay(b) - startOfDay(a)) / msPerDay);
@@ -39,6 +49,7 @@ export const handleFirstSolve = async ({ userId, problemId, runtime, memory }) =
         longestStreak: true,
         lastSolvedAt: true,
         eloRating: true,
+        weeklyScoreWeekStart: true,
       },
     }),
   ]);
@@ -62,6 +73,7 @@ export const handleFirstSolve = async ({ userId, problemId, runtime, memory }) =
   // ── first solve ───────────────────────────────────────────────
   const points = ELO_REWARDS[problem.difficulty] ?? 0;
   const now = new Date();
+  const currentWeekStart = getWeekStart(now);
 
   let newStreak = 1;
   if (user.lastSolvedAt) {
@@ -73,8 +85,14 @@ export const handleFirstSolve = async ({ userId, problemId, runtime, memory }) =
 
   const newLongest = Math.max(newStreak, user.longestStreak);
 
+  const weeklyScoreUpdate =
+    !user.weeklyScoreWeekStart || getWeekStart(user.weeklyScoreWeekStart).getTime() !== currentWeekStart.getTime()
+      ? { set: points }
+      : { increment: points };
+
   // ── atomic write ─────────────────────────────────────────────
   // weeklyScore increments alongside ELO.
+  // If the week changed since the last score, start the new weekly bucket.
   // bestRank is NOT updated here — it is only updated by the
   // Monday 00:00 cron job before resetting weeklyScore.
   await prisma.$transaction([
@@ -85,7 +103,8 @@ export const handleFirstSolve = async ({ userId, problemId, runtime, memory }) =
       where: { id: userId },
       data: {
         eloRating: { increment: points },
-        weeklyScore: { increment: points }, // weekly leaderboard — resets every Monday
+        weeklyScore: weeklyScoreUpdate,
+        weeklyScoreWeekStart: currentWeekStart,
         currentStreak: newStreak,
         longestStreak: newLongest,
         lastSolvedAt: now,

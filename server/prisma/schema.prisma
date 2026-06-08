@@ -30,8 +30,9 @@ model User {
   lastSolvedAt  DateTime?
 
   // leaderboard
-  weeklyScore   Int       @default(0)
-  bestRank      Int? // best weekly leaderboard rank ever achieved
+  weeklyScore          Int       @default(0)
+  weeklyScoreWeekStart DateTime?
+  bestRank             Int? // best weekly leaderboard rank ever achieved
 
   // relations
   problems       Problem[]
