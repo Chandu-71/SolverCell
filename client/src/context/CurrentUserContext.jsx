@@ -25,12 +25,12 @@ export const CurrentUserProvider = ({ children }) => {
       return;
     }
 
+    if (!clerkUser) return;
+
     // Only show <Loading /> on the very first sync
     if (!hasSynced.current) {
       setIsReady(false);
     }
-
-    if (!clerkUser) return;
 
     let cancelled = false;
 
@@ -95,7 +95,7 @@ export const CurrentUserProvider = ({ children }) => {
     return () => {
       cancelled = true;
     };
-  }, [isLoaded, userLoaded, isSignedIn, userId]);
+  }, [isLoaded, userLoaded, isSignedIn, userId, clerkUser]);
 
   const refetch = useCallback(async () => {
     const token = await getToken();

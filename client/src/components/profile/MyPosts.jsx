@@ -69,7 +69,7 @@ const MyPosts = ({ profile }) => {
       }
     };
     fetchPosts();
-  }, [profile?.username]);
+  }, [profile?.username, profile?.displayName, profile?.avatarUrl]);
 
   // ── fetch saved/bookmarks ─────────────────────────────────
   useEffect(() => {
