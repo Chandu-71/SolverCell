@@ -1,36 +1,42 @@
-import { createContext, useCallback, useEffect, useState } from 'react';
-import { useAuth, useSession, useUser } from '@clerk/react';
+import { createContext, useCallback, useEffect, useRef, useState } from 'react';
+import { useAuth, useUser } from '@clerk/react';
 
 import Loading from '../components/Loading';
 
 export const CurrentUserContext = createContext(null);
 
 export const CurrentUserProvider = ({ children }) => {
-  const { isLoaded, isSignedIn } = useAuth();
+  const { isLoaded, isSignedIn, getToken, userId } = useAuth();
   const { isLoaded: userLoaded, user: clerkUser } = useUser();
-  const { isLoaded: sessionLoaded, session } = useSession();
 
   const [user, setUser] = useState(null);
   const [isReady, setIsReady] = useState(false);
 
+  // Track whether the initial sync has already completed
+  const hasSynced = useRef(false);
+
   useEffect(() => {
-    if (!isLoaded || !userLoaded || !sessionLoaded) return;
+    if (!isLoaded || !userLoaded) return;
 
     if (!isSignedIn) {
       setUser(null);
       setIsReady(true);
+      hasSynced.current = false;
       return;
     }
 
-    setIsReady(false);
+    // Only show <Loading /> on the very first sync
+    if (!hasSynced.current) {
+      setIsReady(false);
+    }
 
-    if (!clerkUser || !session) return;
+    if (!clerkUser) return;
 
     let cancelled = false;
 
     const performSync = async (retryCount = 0) => {
       try {
-        const token = await session.getToken();
+        const token = await getToken();
         if (!token || cancelled) return;
 
         const res = await fetch(`${import.meta.env.VITE_API_URL}/api/users/sync`, {
@@ -74,6 +80,7 @@ export const CurrentUserProvider = ({ children }) => {
         }
 
         setUser(data.user);
+        hasSynced.current = true;
         setIsReady(true);
       } catch (err) {
         if (!cancelled) {
@@ -88,12 +95,10 @@ export const CurrentUserProvider = ({ children }) => {
     return () => {
       cancelled = true;
     };
-  }, [isLoaded, userLoaded, sessionLoaded, isSignedIn, clerkUser, session]);
+  }, [isLoaded, userLoaded, isSignedIn, userId]);
 
   const refetch = useCallback(async () => {
-    if (!session) return;
-
-    const token = await session.getToken();
+    const token = await getToken();
     if (!token) return;
 
     const res = await fetch(`${import.meta.env.VITE_API_URL}/api/users/me`, {
@@ -113,7 +118,7 @@ export const CurrentUserProvider = ({ children }) => {
     if (data.success) {
       setUser(data.user);
     }
-  }, [session]);
+  }, [getToken]);
 
   if (!isReady) {
     return <Loading />;

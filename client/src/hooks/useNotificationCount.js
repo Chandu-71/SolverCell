@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useAuth, useSession } from '@clerk/react';
+import { useAuth } from '@clerk/react';
 import useSocket from './useSocket';
 import useCurrentUser from './useCurrentUser';
 
@@ -24,8 +24,7 @@ export const resetNotificationCount = () => {
 };
 
 const useNotificationCount = () => {
-  const { isSignedIn } = useAuth();
-  const { session } = useSession();
+  const { isSignedIn, getToken } = useAuth();
   const { isReady } = useCurrentUser();
   const socket = useSocket();
 
@@ -46,11 +45,11 @@ const useNotificationCount = () => {
   }, [isSignedIn]);
 
   useEffect(() => {
-    if (!isReady || initialized || !isSignedIn || !session) return;
+    if (!isReady || initialized || !isSignedIn) return;
 
     const fetchCount = async () => {
       try {
-        const token = await session.getToken();
+        const token = await getToken();
         if (!token) return;
 
         const res = await fetch(`${import.meta.env.VITE_API_URL}/api/notifications`, {
@@ -77,7 +76,7 @@ const useNotificationCount = () => {
     };
 
     fetchCount();
-  }, [isReady, isSignedIn, session]);
+  }, [isReady, isSignedIn, getToken]);
 
   useEffect(() => {
     if (socketBound) return;

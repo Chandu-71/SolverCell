@@ -17,18 +17,22 @@ const MAX_LENGTH = 1000;
 
 // ─── CommentSkeleton ──────────────────────────────────────────
 const CommentSkeleton = () => (
-  <div className='flex gap-3 animate-pulse'>
-    <div className='h-8 w-8 rounded-full bg-white/5' />
-    <div className='flex-1 space-y-2'>
-      <div className='flex gap-2'>
-        <div className='h-4 w-24 rounded bg-white/5' />
-        <div className='h-4 w-16 rounded bg-white/5' />
+  <div className='space-y-4 py-2'>
+    {[1, 2, 3].map(i => (
+      <div className='flex gap-3 animate-pulse'>
+        <div className='h-8 w-8 rounded-full bg-white/5' />
+        <div className='flex-1 space-y-2'>
+          <div className='flex gap-2'>
+            <div className='h-4 w-24 rounded bg-white/5' />
+            <div className='h-4 w-16 rounded bg-white/5' />
+          </div>
+          <div className='space-y-1.5'>
+            <div className='h-3.5 w-full rounded bg-white/5' />
+            <div className='h-3.5 w-3/4 rounded bg-white/5' />
+          </div>
+        </div>
       </div>
-      <div className='space-y-1.5'>
-        <div className='h-3.5 w-full rounded bg-white/5' />
-        <div className='h-3.5 w-3/4 rounded bg-white/5' />
-      </div>
-    </div>
+    ))}
   </div>
 );
 
@@ -76,17 +80,12 @@ const CommentItem = ({ comment, currentUserId, onDelete, isDeleting }) => {
 const EmptyState = () => (
   <div className='flex flex-col items-center justify-center py-8 text-center'>
     <div className='rounded-full bg-white/5 p-3 mb-3'>
-      <MessageSquare 
-        size={20} 
-        strokeWidth={1.5} 
-        className='text-slate-600'
-      />
+      <MessageSquare size={20} strokeWidth={1.5} className='text-slate-600' />
     </div>
     <p className='text-sm font-medium text-slate-400'>No comments yet</p>
     <p className='text-xs text-slate-600 mt-1'>Be the first to share your thoughts</p>
   </div>
 );
-
 
 // ─── ErrorState ───────────────────────────────────────────────
 const ErrorState = ({ onRetry }) => (
@@ -150,15 +149,6 @@ const CommentSection = ({ problemId, currentUser, onUpdateCount }) => {
   useEffect(() => {
     fetchComments(1);
   }, [problemId]);
-
-  // ── auto-resize textarea ──────────────────────────────────
-  useEffect(() => {
-    const textarea = textareaRef.current;
-    if (textarea) {
-      textarea.style.height = 'auto';
-      textarea.style.height = `${Math.min(textarea.scrollHeight, 120)}px`;
-    }
-  }, [body]);
 
   // ── post ─────────────────────────────────────────────────
   const handlePost = async () => {
@@ -224,11 +214,7 @@ const CommentSection = ({ problemId, currentUser, onUpdateCount }) => {
     <div className={'mt-3 space-y-4 border-t border-white/6 pt-5'}>
       {/* compose box */}
       <div className='flex gap-3'>
-        <img
-          src={currentUser?.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=user`}
-          alt='Your avatar'
-          className='h-8 w-8 shrink-0 rounded-full border border-white/10 object-cover mt-0.5'
-        />
+        <img src={currentUser?.avatarUrl} alt='Your avatar' className='h-8 w-8 shrink-0 rounded-full border border-white/10 object-cover mt-0.5' />
         <div className='flex-1'>
           <div
             className={`
@@ -295,11 +281,7 @@ const CommentSection = ({ problemId, currentUser, onUpdateCount }) => {
       {/* comments list */}
       <div className='space-y-1'>
         {loading ? (
-          <div className='space-y-4 py-2'>
-            {[1, 2, 3].map(i => (
-              <CommentSkeleton key={i} />
-            ))}
-          </div>
+          <CommentSkeleton />
         ) : error ? (
           <ErrorState onRetry={() => fetchComments(1)} />
         ) : comments.length === 0 ? (

@@ -196,9 +196,9 @@ router.post(
               });
 
               if (!tag) {
-                tag = ({
+                tag = {
                   data: { name: tagName },
-                });
+                };
               }
 
               return {
@@ -866,7 +866,7 @@ router.post(
       return res.status(404).json({ success: false, message: 'Problem not found' });
     }
 
-    // create comment + increment counter in one transaction
+    // create comment + increment counter
     const [comment] = await prisma.$transaction([
       prisma.comment.create({
         data: { userId: dbUser.id, problemId: id, body: body.trim() },
