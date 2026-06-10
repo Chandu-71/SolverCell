@@ -279,7 +279,7 @@ const ProblemDescription = ({ problem }) => {
           {/* DECOUPLED COMMENT SECTION */}
           {showComments && (
             <div className='mt-6'>
-              <CommentSection problemId={problem.id} currentUser={dbUser} compact={false} onUpdateCount={setCommentCount} />
+              <CommentSection problemId={problem.id} currentUser={dbUser} onUpdateCount={setCommentCount} />
             </div>
           )}
         </div>

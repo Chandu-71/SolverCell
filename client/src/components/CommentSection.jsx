@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@clerk/react';
 import { useNavigate } from 'react-router-dom';
-import { Send, Trash2, Loader2, ChevronDown, AlertCircle } from 'lucide-react';
+import { Send, Trash2, Loader2, ChevronDown, AlertCircle, MessageSquare } from 'lucide-react';
 
 // ─── helpers ─────────────────────────────────────────────────
 const timeAgo = iso => {
@@ -40,8 +40,8 @@ const CommentItem = ({ comment, currentUserId, onDelete, isDeleting }) => {
   return (
     <div className='group flex gap-3 py-1'>
       <img
-        src={comment.user.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${comment.user.username}`}
-        alt={comment.user.displayName}
+        src={comment.user.avatarUrl}
+        alt={comment.user.username}
         onClick={() => navigate(`/profile/${comment.user.username}`)}
         className='h-8 w-8 shrink-0 cursor-pointer rounded-full border border-white/10 object-cover transition-transform hover:scale-105 mt-0.5'
       />
@@ -51,9 +51,8 @@ const CommentItem = ({ comment, currentUserId, onDelete, isDeleting }) => {
             onClick={() => navigate(`/profile/${comment.user.username}`)}
             className='cursor-pointer text-sm font-semibold text-white hover:text-red-400 transition-colors'
           >
-            {comment.user.displayName}
+            {comment.user.username}
           </span>
-          <span className='text-xs text-slate-500'>@{comment.user.username}</span>
           <span className='text-[10px] text-slate-700'>•</span>
           <span className='text-xs text-slate-500'>{timeAgo(comment.createdAt)}</span>
         </div>
@@ -64,7 +63,7 @@ const CommentItem = ({ comment, currentUserId, onDelete, isDeleting }) => {
         <button
           onClick={() => onDelete(comment.id)}
           disabled={isDeleting}
-          className='shrink-0 opacity-0 group-hover:opacity-100 rounded-lg px-3 text-slate-500 cursor-pointer transition-all hover:bg-red-500/10 hover:text-red-400 disabled:opacity-50'
+          className='shrink-0 rounded-lg px-3 text-slate-500 cursor-pointer transition-all hover:bg-red-500/10 hover:text-red-400 disabled:opacity-50'
         >
           {isDeleting ? <Loader2 size={13} className='animate-spin' /> : <Trash2 size={13} />}
         </button>
@@ -77,23 +76,17 @@ const CommentItem = ({ comment, currentUserId, onDelete, isDeleting }) => {
 const EmptyState = () => (
   <div className='flex flex-col items-center justify-center py-8 text-center'>
     <div className='rounded-full bg-white/5 p-3 mb-3'>
-      <svg
-        width='20'
-        height='20'
-        viewBox='0 0 24 24'
-        fill='none'
-        stroke='currentColor'
-        strokeWidth='1.5'
-        strokeLinecap='round'
+      <MessageSquare 
+        size={20} 
+        strokeWidth={1.5} 
         className='text-slate-600'
-      >
-        <path d='M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z' />
-      </svg>
+      />
     </div>
     <p className='text-sm font-medium text-slate-400'>No comments yet</p>
     <p className='text-xs text-slate-600 mt-1'>Be the first to share your thoughts</p>
   </div>
 );
+
 
 // ─── ErrorState ───────────────────────────────────────────────
 const ErrorState = ({ onRetry }) => (
@@ -107,7 +100,7 @@ const ErrorState = ({ onRetry }) => (
 );
 
 // ─── CommentSection ───────────────────────────────────────────
-const CommentSection = ({ problemId, currentUser, compact = false, onUpdateCount }) => {
+const CommentSection = ({ problemId, currentUser, onUpdateCount }) => {
   const { getToken } = useAuth();
 
   const [comments, setComments] = useState([]);
@@ -228,7 +221,7 @@ const CommentSection = ({ problemId, currentUser, compact = false, onUpdateCount
   const showCountdown = characterCount > MAX_LENGTH * 0.85;
 
   return (
-    <div className={`mt-3 space-y-4 ${compact ? '' : 'border-t border-white/6 pt-5'}`}>
+    <div className={'mt-3 space-y-4 border-t border-white/6 pt-5'}>
       {/* compose box */}
       <div className='flex gap-3'>
         <img
@@ -254,7 +247,7 @@ const CommentSection = ({ problemId, currentUser, compact = false, onUpdateCount
               onFocus={() => setIsFocused(true)}
               onBlur={() => setIsFocused(false)}
               placeholder='Write a comment…'
-              rows={compact ? 2 : 3}
+              rows={3}
               maxLength={MAX_LENGTH + 100} // Allow slight overtyping with visual feedback
               className='w-full resize-none bg-transparent px-3.5 py-2.5 text-sm text-white placeholder-slate-500 outline-none'
             />

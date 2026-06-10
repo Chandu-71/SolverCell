@@ -277,146 +277,6 @@ router.get(
   }),
 );
 
-router.get(
-  '/:id/save-status',
-  asyncHandler(async (req, res) => {
-    const { userId } = getAuth(req);
-    const { id } = req.params;
-
-    if (!userId) {
-      return res.json({
-        success: true,
-        saved: false,
-      });
-    }
-
-    const dbUser = await prisma.user.findUnique({
-      where: { clerkId: userId },
-    });
-
-    if (!dbUser) {
-      return res.json({
-        success: true,
-        saved: false,
-      });
-    }
-
-    const existingBookmark = await prisma.bookmark.findUnique({
-      where: {
-        userId_problemId: {
-          userId: dbUser.id,
-          problemId: id,
-        },
-      },
-    });
-
-    res.json({
-      success: true,
-      saved: !!existingBookmark,
-    });
-  }),
-);
-
-router.post(
-  '/:id/save',
-  asyncHandler(async (req, res) => {
-    const { userId } = getAuth(req);
-    const { id } = req.params;
-
-    if (!userId) {
-      return res.status(401).json({
-        success: false,
-        message: 'Unauthorized',
-      });
-    }
-
-    const dbUser = await prisma.user.findUnique({
-      where: { clerkId: userId },
-    });
-
-    if (!dbUser) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found',
-      });
-    }
-
-    const existingBookmark = await prisma.bookmark.findUnique({
-      where: {
-        userId_problemId: {
-          userId: dbUser.id,
-          problemId: id,
-        },
-      },
-    });
-
-    if (!existingBookmark) {
-      await prisma.bookmark.create({
-        data: {
-          userId: dbUser.id,
-          problemId: id,
-        },
-      });
-    }
-
-    res.json({
-      success: true,
-      saved: true,
-    });
-  }),
-);
-
-router.delete(
-  '/:id/save',
-  asyncHandler(async (req, res) => {
-    const { userId } = getAuth(req);
-    const { id } = req.params;
-
-    if (!userId) {
-      return res.status(401).json({
-        success: false,
-        message: 'Unauthorized',
-      });
-    }
-
-    const dbUser = await prisma.user.findUnique({
-      where: { clerkId: userId },
-    });
-
-    if (!dbUser) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found',
-      });
-    }
-
-    const existingBookmark = await prisma.bookmark.findUnique({
-      where: {
-        userId_problemId: {
-          userId: dbUser.id,
-          problemId: id,
-        },
-      },
-    });
-
-    if (existingBookmark) {
-      await prisma.bookmark.delete({
-        where: {
-          userId_problemId: {
-            userId: dbUser.id,
-            problemId: id,
-          },
-        },
-      });
-    }
-
-    res.json({
-      success: true,
-      saved: false,
-    });
-  }),
-);
-
 router.post(
   '/:id/like',
   asyncHandler(async (req, res) => {
@@ -590,6 +450,146 @@ router.delete(
       success: true,
       liked: false,
       likesCount: updatedProblem.likesCount,
+    });
+  }),
+);
+
+router.get(
+  '/:id/save-status',
+  asyncHandler(async (req, res) => {
+    const { userId } = getAuth(req);
+    const { id } = req.params;
+
+    if (!userId) {
+      return res.json({
+        success: true,
+        saved: false,
+      });
+    }
+
+    const dbUser = await prisma.user.findUnique({
+      where: { clerkId: userId },
+    });
+
+    if (!dbUser) {
+      return res.json({
+        success: true,
+        saved: false,
+      });
+    }
+
+    const existingBookmark = await prisma.bookmark.findUnique({
+      where: {
+        userId_problemId: {
+          userId: dbUser.id,
+          problemId: id,
+        },
+      },
+    });
+
+    res.json({
+      success: true,
+      saved: !!existingBookmark,
+    });
+  }),
+);
+
+router.post(
+  '/:id/save',
+  asyncHandler(async (req, res) => {
+    const { userId } = getAuth(req);
+    const { id } = req.params;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: 'Unauthorized',
+      });
+    }
+
+    const dbUser = await prisma.user.findUnique({
+      where: { clerkId: userId },
+    });
+
+    if (!dbUser) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found',
+      });
+    }
+
+    const existingBookmark = await prisma.bookmark.findUnique({
+      where: {
+        userId_problemId: {
+          userId: dbUser.id,
+          problemId: id,
+        },
+      },
+    });
+
+    if (!existingBookmark) {
+      await prisma.bookmark.create({
+        data: {
+          userId: dbUser.id,
+          problemId: id,
+        },
+      });
+    }
+
+    res.json({
+      success: true,
+      saved: true,
+    });
+  }),
+);
+
+router.delete(
+  '/:id/save',
+  asyncHandler(async (req, res) => {
+    const { userId } = getAuth(req);
+    const { id } = req.params;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: 'Unauthorized',
+      });
+    }
+
+    const dbUser = await prisma.user.findUnique({
+      where: { clerkId: userId },
+    });
+
+    if (!dbUser) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found',
+      });
+    }
+
+    const existingBookmark = await prisma.bookmark.findUnique({
+      where: {
+        userId_problemId: {
+          userId: dbUser.id,
+          problemId: id,
+        },
+      },
+    });
+
+    if (existingBookmark) {
+      await prisma.bookmark.delete({
+        where: {
+          userId_problemId: {
+            userId: dbUser.id,
+            problemId: id,
+          },
+        },
+      });
+    }
+
+    res.json({
+      success: true,
+      saved: false,
     });
   }),
 );

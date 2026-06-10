@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Heart, MessageCircle, Share2, Bookmark, Users } from 'lucide-react';
+
 import { useAuth } from '@clerk/react';
 import useCurrentUser from '../hooks/useCurrentUser';
+
 import CommentSection from '../components/CommentSection';
 import Loading from '../components/Loading';
 import ShareModal from '../components/ShareModal';
@@ -20,6 +22,72 @@ const DIFFICULTY_CONFIG = {
   Easy: { color: 'text-emerald-400', bg: 'bg-emerald-400/10 border-emerald-400/20', dot: 'bg-emerald-400' },
   Medium: { color: 'text-amber-400', bg: 'bg-amber-400/10 border-amber-400/20', dot: 'bg-amber-400' },
   Hard: { color: 'text-red-400', bg: 'bg-red-400/10 border-red-400/20', dot: 'bg-red-400' },
+};
+
+// ─── FeedSkeleton ────────────────────────────────────────────
+const FeedSkeleton = () => {
+  return (
+    <div className='space-y-4'>
+      {[1, 2, 3].map(i => (
+        <div key={i} className='rounded-xl border border-white/8 bg-[#0d0d0d] p-5 animate-pulse' style={{ animationDelay: `${i * 100}ms` }}>
+          {/* Header */}
+          <div className='flex items-start justify-between gap-3'>
+            <div className='flex items-center gap-3'>
+              <div className='h-11 w-11 rounded-full bg-white/10' />
+              <div className='space-y-2'>
+                <div className='h-3 w-24 rounded bg-white/10' />
+                <div className='h-3 w-16 rounded bg-white/10' />
+              </div>
+            </div>
+            <div className='flex items-center gap-2'>
+              <div className='h-5 w-16 rounded-full bg-white/10' />
+              <div className='h-5 w-20 rounded-full bg-white/10' />
+            </div>
+          </div>
+
+          {/* Title & Summary */}
+          <div className='mt-4 space-y-3'>
+            <div className='h-5 w-3/4 rounded bg-white/10' />
+            <div className='space-y-2'>
+              <div className='h-3 w-full rounded bg-white/10' />
+              <div className='h-3 w-5/6 rounded bg-white/10' />
+            </div>
+          </div>
+
+          {/* Tags */}
+          <div className='mt-4 flex flex-wrap gap-1.5'>
+            {[1, 2, 3].map(tag => (
+              <div key={tag} className='h-5 w-16 rounded-md bg-white/10' />
+            ))}
+          </div>
+
+          {/* Stats Bar */}
+          <div className='mt-4 space-y-2'>
+            <div className='flex items-center justify-between'>
+              <div className='h-3 w-32 rounded bg-white/10' />
+              <div className='h-3 w-24 rounded bg-white/10' />
+            </div>
+            <div className='h-1 w-full rounded-full bg-white/10' />
+          </div>
+
+          {/* Action Buttons */}
+          <div className='mt-4 border-t border-white/8 pt-4'>
+            <div className='flex items-center justify-between'>
+              <div className='flex items-center gap-5'>
+                {[1, 2, 3].map(btn => (
+                  <div key={btn} className='flex items-center gap-1.5'>
+                    <div className='h-4 w-4 rounded bg-white/10' />
+                    <div className='h-3 w-8 rounded bg-white/10' />
+                  </div>
+                ))}
+              </div>
+              <div className='h-4 w-4 rounded bg-white/10' />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
 };
 
 // ─── ProblemCard ─────────────────────────────────────────────
@@ -49,6 +117,24 @@ const ProblemCard = ({ problem, index, getToken, solvedProblems = [], attemptedP
   const diff = DIFFICULTY_CONFIG[problem.difficulty] || DIFFICULTY_CONFIG.Medium;
   const solveRate = problem.totalAttempts > 0 ? Math.round((problem.successfulSolves / problem.totalAttempts) * 100) : 0;
 
+  useEffect(() => {
+    const fetchLikeStatus = async () => {
+      try {
+        const token = await getToken();
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/problems/${problem.id}/like-status`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        if (data.success) {
+          setLiked(data.liked);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchLikeStatus();
+  }, [problem.id, getToken]);
+
   const handleLike = async () => {
     try {
       setLikeLoading(true);
@@ -72,24 +158,6 @@ const ProblemCard = ({ problem, index, getToken, solvedProblems = [], attemptedP
       setLikeLoading(false);
     }
   };
-
-  useEffect(() => {
-    const fetchLikeStatus = async () => {
-      try {
-        const token = await getToken();
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/problems/${problem.id}/like-status`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const data = await res.json();
-        if (data.success) {
-          setLiked(data.liked);
-        }
-      } catch (error) {
-        console.error(error);
-      }
-    };
-    fetchLikeStatus();
-  }, [problem.id, getToken]);
 
   useEffect(() => {
     const fetchSaveStatus = async () => {
@@ -252,7 +320,7 @@ const ProblemCard = ({ problem, index, getToken, solvedProblems = [], attemptedP
           </div>
         </div>
 
-        {showComments && <CommentSection problemId={problem.id} currentUser={dbUser} compact={true} onUpdateCount={setCommentCount} />}
+        {showComments && <CommentSection problemId={problem.id} currentUser={dbUser} onUpdateCount={setCommentCount} />}
       </div>
 
       {shareOpen && (
@@ -320,12 +388,9 @@ const Feed = () => {
     { id: 'following', label: 'Following' },
   ];
 
-  if (loading) {
-    return <Loading />;
-  }
-
   return (
     <div className='space-y-4'>
+      {/* Tabs */}
       <div className='sticky top-0 z-20 flex items-center justify-around rounded-2xl border border-white/8 bg-[#090909]/90 p-2 backdrop-blur-xl'>
         {tabs.map(tab => (
           <button
@@ -340,7 +405,10 @@ const Feed = () => {
         ))}
       </div>
 
-      {filteredProblems.length === 0 ? (
+      {/* Content */}
+      {loading ? (
+        <FeedSkeleton />
+      ) : filteredProblems.length === 0 ? (
         <div className='rounded-2xl border border-white/8 bg-black p-12 text-center'>
           <p className='text-slate-500 text-sm'>No problems here yet.</p>
         </div>

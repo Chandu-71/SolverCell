@@ -6,7 +6,7 @@ import Loading from '../components/Loading';
 export const CurrentUserContext = createContext(null);
 
 export const CurrentUserProvider = ({ children }) => {
-  const { isLoaded, isSignedIn, signOut } = useAuth();
+  const { isLoaded, isSignedIn } = useAuth();
   const { isLoaded: userLoaded, user: clerkUser } = useUser();
   const { isLoaded: sessionLoaded, session } = useSession();
 
