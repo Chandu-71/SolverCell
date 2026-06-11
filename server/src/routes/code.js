@@ -8,29 +8,35 @@ import { handleFirstSolve } from '../lib/solveRewards.js';
 const router = express.Router();
 
 const LANGUAGE_MAP = {
-  python: 71,
-  cpp: 54,
-  c: 50,
-  java: 62,
-  javascript: 63,
+  python: 'python-3.14',
+  cpp: 'g++-15',
+  c: 'gcc-15',
+  java: 'openjdk-25',
+  javascript: 'typescript-deno',
+  typescript: 'typescript-deno',
+  csharp: 'dotnet-csharp-9',
+  php: 'php-8.5',
+  ruby: 'ruby-4.0',
+  go: 'go-1.26',
+  rust: 'rust-1.93',
 };
 
-const runCode = async (code, languageId, stdin = '') => {
-  const response = await fetch('https://judge029.p.rapidapi.com/submissions?base64_encoded=false&wait=true&fields=*', {
+const runCode = async (code, compiler, stdin = '') => {
+  const response = await fetch('https://api.onlinecompiler.io/api/run-code-sync/', {
     method: 'POST',
     headers: {
-      'x-rapidapi-key': process.env.RAPIDAPI_KEY,
-      'x-rapidapi-host': 'judge029.p.rapidapi.com',
+      Authorization: process.env.ONLINECOMPILER_API_KEY,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      source_code: code,
-      language_id: languageId,
-      stdin,
+      compiler,
+      code,
+      input: stdin,
     }),
   });
 
-  return response.json();
+  const data = await response.json();
+  return data;
 };
 
 router.post(
@@ -45,23 +51,23 @@ router.post(
       });
     }
 
-    const languageId = LANGUAGE_MAP[language];
+    const compiler = LANGUAGE_MAP[language];
 
-    if (!languageId) {
+    if (!compiler) {
       return res.status(400).json({
         success: false,
         message: 'Unsupported language',
       });
     }
 
-    const data = await runCode(code, languageId, stdin);
+    const data = await runCode(code, compiler, stdin);
 
     res.json({
       success: true,
-      stdout: data.stdout,
-      stderr: data.stderr,
-      compile_output: data.compile_output,
-      status: data.status?.description,
+      stdout: data.output || '',
+      stderr: data.error || '',
+      compile_output: data.error || '',
+      status: data.status === 'success' ? 'ACCEPTED' : 'ERROR',
       time: data.time,
       memory: data.memory,
     });
@@ -88,9 +94,9 @@ router.post(
       });
     }
 
-    const languageId = LANGUAGE_MAP[language];
+    const compiler = LANGUAGE_MAP[language];
 
-    if (!languageId) {
+    if (!compiler) {
       return res.status(400).json({
         success: false,
         message: 'Unsupported language',
@@ -156,22 +162,24 @@ router.post(
 
     // run all hidden testcases
     for (const testCase of hiddenCases) {
-      const result = await runCode(code, languageId, testCase.input);
+      const result = await runCode(code, compiler, testCase.input);
 
-      // compile/runtime errors
-      if (result.compile_output) {
-        finalStatus = 'COMPILATION_ERROR';
-        errorMessage = result.compile_output;
-        break;
+      // Check for errors and compilation/runtime issues
+      if (result.status !== 'success') {
+        if (result.error && result.exit_code && result.exit_code !== 0) {
+          // Determine if it's a compilation error or runtime error
+          // Exit codes: 0 = success, 1 = runtime error, 124 = timeout, 137 = memory limit
+          if (result.exit_code === 1 || result.exit_code > 128) {
+            finalStatus = 'RUNTIME_ERROR';
+          } else {
+            finalStatus = 'COMPILATION_ERROR';
+          }
+          errorMessage = result.error;
+          break;
+        }
       }
 
-      if (result.stderr) {
-        finalStatus = 'RUNTIME_ERROR';
-        errorMessage = result.stderr;
-        break;
-      }
-
-      const actual = (result.stdout || '').trim();
+      const actual = (result.output || '').trim();
       const expected = (testCase.expectedOutput || '').trim();
 
       if (actual !== expected) {
@@ -182,8 +190,8 @@ router.post(
         break;
       }
 
-      finalRuntime = parseFloat(result.time || 0);
-      finalMemory = result.memory || 0;
+      finalRuntime = Number(result.time) || 0;
+      finalMemory = Number(result.memory) || 0;
     }
 
     // save submission (always, regardless of status)

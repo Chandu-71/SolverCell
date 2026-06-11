@@ -48,7 +48,7 @@ const UserSearchBox = ({ onStartConversation }) => {
   return (
     <div className='px-3 py-3'>
       <div className='relative'>
-        <Search size={14} className='pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-600' />
+        <Search size={16} className='pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-600' />
 
         <input
           value={query}
@@ -57,7 +57,7 @@ const UserSearchBox = ({ onStartConversation }) => {
             search(e.target.value);
           }}
           placeholder='Search people…'
-          className='w-full rounded-xl border border-white/8 bg-[#141414] py-2 pl-8 pr-3 text-sm text-white placeholder-slate-600 outline-none transition focus:border-red-500/40'
+          className='w-full rounded-xl border border-white/8 bg-[#141414] py-2 pl-10 pr-3 text-sm text-white placeholder-slate-600 outline-none transition focus:border-red-500/40'
         />
 
         {query && (
@@ -69,7 +69,7 @@ const UserSearchBox = ({ onStartConversation }) => {
             }}
             className='absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer text-slate-600 hover:text-red-400'
           >
-            <X size={13} />
+            <X size={16} />
           </button>
         )}
       </div>
@@ -77,7 +77,6 @@ const UserSearchBox = ({ onStartConversation }) => {
       {/* results dropdown */}
       {showDropdown && (
         <div className='mt-1.5 overflow-hidden rounded-xl border border-white/8 bg-[#111]'>
-          {/* loading */}
           {loading && (
             <div className='flex justify-center py-4'>
               <Loader2 size={16} className='animate-spin text-red-400' />
@@ -99,10 +98,7 @@ const UserSearchBox = ({ onStartConversation }) => {
                 className='flex w-full cursor-pointer items-center gap-3 px-3 py-2.5 text-left transition hover:bg-white/5'
               >
                 <div className='relative shrink-0'>
-                  <img
-                    src={u.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${u.username}`}
-                    className='h-8 w-8 rounded-full border border-white/10 object-cover'
-                  />
+                  <img src={u.avatarUrl} className='h-8 w-8 rounded-full border border-white/10 object-cover' />
                   {u.isOnline && <span className='absolute bottom-0 right-0 h-2 w-2 rounded-full border-2 border-[#111] bg-emerald-400' />}
                 </div>
 

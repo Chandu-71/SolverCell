@@ -20,13 +20,8 @@ const LeftSidebar = ({ collapsed = false }) => {
     <aside
       className={`group px-2 py-2 z-50 flex h-screen flex-col bg-black transition-all duration-300 ${collapsed ? 'fixed w-20 hover:w-60' : 'sticky top-0 w-60'}`}
     >
-      <div className='mb-20 flex items-center justify-start gap-2'>
-        <img
-          onClick={() => navigate('/')}
-          src={assets.logo}
-          alt='logo'
-          className='h-12 w-12 shrink-0 object-contain hover:cursor-pointer rounded-full'
-        />
+      <div onClick={() => navigate('/')} className='mb-20 flex items-center justify-start gap-2 cursor-pointer'>
+        <img src={assets.logo} alt='logo' className='h-12 w-12 shrink-0 object-contain rounded-full' />
         <div
           className={`overflow-hidden transition-all duration-300 ${
             collapsed ? 'max-w-0 opacity-0 group-hover:max-w-48 group-hover:opacity-100' : 'max-w-48 opacity-100'

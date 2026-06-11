@@ -4,11 +4,18 @@ import { ChevronDown, RotateCcw, Copy, Check, Maximize2 } from 'lucide-react';
 
 // ─── language config ─────────────────────────────────────────
 const LANGUAGES = [
-  { id: 'python', label: 'Python 3', monaco: 'python' },
-  { id: 'cpp', label: 'C++', monaco: 'cpp' },
-  { id: 'c', label: 'C', monaco: 'c' },
-  { id: 'java', label: 'Java', monaco: 'java' },
-  { id: 'javascript', label: 'JavaScript', monaco: 'javascript' },
+  { id: 'python', label: 'Python 3.14', monaco: 'python' },
+  { id: 'cpp', label: 'C++ (G++ 15)', monaco: 'cpp' },
+  { id: 'c', label: 'C (GCC 15)', monaco: 'c' },
+  { id: 'java', label: 'Java (OpenJDK 25)', monaco: 'java' },
+  { id: 'javascript', label: 'JavaScript (Deno)', monaco: 'javascript' },
+
+  { id: 'typescript', label: 'TypeScript (Deno)', monaco: 'typescript' },
+  { id: 'csharp', label: 'C# (.NET 9)', monaco: 'csharp' },
+  { id: 'php', label: 'PHP 8.5', monaco: 'php' },
+  { id: 'ruby', label: 'Ruby 4.0', monaco: 'ruby' },
+  { id: 'go', label: 'Go 1.26', monaco: 'go' },
+  { id: 'rust', label: 'Rust 1.93', monaco: 'rust' },
 ];
 
 // starter boilerplate per language
@@ -56,9 +63,47 @@ function solution(input) {
     // write your solution here
 }
 `,
+  typescript: `function solution(input: string): void {
+    // write your solution here
+}
+`,
+
+  csharp: `using System;
+
+class Program {
+    static void Main() {
+        // write your solution here
+    }
+}
+`,
+
+  php: `<?php
+
+// write your solution here
+
+?>
+`,
+
+  ruby: `# write your solution here
+`,
+
+  go: `package main
+
+import "fmt"
+
+func main() {
+    // write your solution here
+    fmt.Println()
+}
+`,
+
+  rust: `fn main() {
+    // write your solution here
+}
+`,
 };
 
-// Monaco editor theme that matches your dark UI
+// Monaco editor theme
 const EDITOR_THEME = {
   base: 'vs-dark',
   inherit: true,
@@ -112,7 +157,7 @@ const LangDropdown = ({ selected, onChange }) => {
         <>
           {/* backdrop */}
           <div className='fixed inset-0 z-10' onClick={() => setOpen(false)} />
-          <div className='absolute left-0 top-full z-20 mt-1.5 w-40 overflow-hidden rounded-xl border border-white/10 bg-[#141414] shadow-xl shadow-black/60'>
+          <div className='absolute left-0 top-full z-20 mt-1.5 max-h-64 w-52 overflow-y-auto overflow-x-hidden rounded-xl border border-white/10 bg-[#141414] shadow-xl shadow-black/60'>
             {LANGUAGES.map(lang => (
               <button
                 key={lang.id}
@@ -221,7 +266,7 @@ const CodeEditorPanel = ({ problem, onCodeChange }) => {
     monaco.editor.defineTheme('platform-dark', EDITOR_THEME);
     monaco.editor.setTheme('platform-dark');
 
-    // kill the default context menu (optional – keeps it clean)
+    // kill the default context menu
     editor.updateOptions({ contextmenu: false });
   };
 

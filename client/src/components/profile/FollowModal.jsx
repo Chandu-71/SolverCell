@@ -2,19 +2,16 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { X, Search } from 'lucide-react';
 import { useAuth } from '@clerk/react';
-import useCurrentUser from '../../hooks/useCurrentUser'; // Adjust path if needed
+import useCurrentUser from '../../hooks/useCurrentUser';
 
-// ── Individual User Row (Handles its own Follow/Unfollow logic) ──
+// ── Individual User Row ──
 const UserRow = ({ user, onNavigate, isOwnFollowingList }) => {
   const { getToken } = useAuth();
   const { user: currentUser } = useCurrentUser();
 
-  // If viewing your OWN "Following" list, you are definitely following them.
-  // If not, we check if your backend provided an `isFollowing` boolean, defaulting to false.
   const [isFollowing, setIsFollowing] = useState(isOwnFollowingList ? true : user.isFollowing || false);
   const [loading, setLoading] = useState(false);
 
-  // Hide the button if the user in the list is the currently logged-in user
   const isMe = currentUser?.username === user.username;
 
   const handleFollowToggle = async e => {
@@ -32,7 +29,7 @@ const UserRow = ({ user, onNavigate, isOwnFollowingList }) => {
       const data = await res.json();
 
       if (data.success) {
-        setIsFollowing(!isFollowing);
+        setIsFollowing(prev => !prev);
       }
     } catch (error) {
       console.error('Failed to toggle follow:', error);
@@ -43,7 +40,7 @@ const UserRow = ({ user, onNavigate, isOwnFollowingList }) => {
 
   return (
     <div className='flex items-center justify-between px-5 py-4 transition hover:bg-white/3'>
-      {/* USER INFO (Clickable for navigation) */}
+      {/* USER INFO */}
       <div onClick={() => onNavigate(user.username)} className='flex cursor-pointer items-center gap-4'>
         <img src={user.avatarUrl} alt={user.username} className='h-12 w-12 rounded-full border border-white/10 object-cover' />
         <div>
@@ -52,7 +49,7 @@ const UserRow = ({ user, onNavigate, isOwnFollowingList }) => {
         </div>
       </div>
 
-      {/* WORKING FOLLOW BUTTON */}
+      {/* FOLLOW BUTTON */}
       {!isMe && (
         <button
           onClick={handleFollowToggle}
@@ -84,7 +81,6 @@ const FollowModal = ({ title, users, onClose, isOwnProfile }) => {
     user => user.username.toLowerCase().includes(searchQuery.toLowerCase()) || user.displayName.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
-  // We need to know if we are looking at our OWN following list to set initial state correctly
   const isOwnFollowingList = isOwnProfile && title === 'Following';
 
   return (

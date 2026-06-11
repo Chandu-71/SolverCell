@@ -104,7 +104,6 @@ const MyPosts = ({ profile }) => {
       });
       const data = await res.json();
       if (data.success) {
-        // remove from local state immediately — no need to refetch
         setPosts(prev => prev.filter(p => p.id !== deletingProblem.id));
         setDeletingProblem(null);
       } else {
@@ -254,11 +253,17 @@ const MyPosts = ({ profile }) => {
         <div className='mt-4 border-t border-white/6 pt-4'>
           <div className='flex items-center justify-between'>
             <div className='flex items-center gap-5'>
-              <button className='flex cursor-pointer items-center gap-1.5 text-sm text-slate-500 transition hover:text-red-400'>
+              <button
+                onClick={() => navigate(`/problem/${problem.id}`)}
+                className='flex cursor-pointer items-center gap-1.5 text-sm text-slate-500 transition hover:text-red-400'
+              >
                 <Heart size={16} />
                 <span>{problem.likesCount || 0}</span>
               </button>
-              <button className='flex cursor-pointer items-center gap-1.5 text-sm text-slate-500 transition hover:text-sky-400'>
+              <button
+                onClick={() => navigate(`/problem/${problem.id}`)}
+                className='flex cursor-pointer items-center gap-1.5 text-sm text-slate-500 transition hover:text-sky-400'
+              >
                 <MessageCircle size={16} />
                 <span>{problem.commentsCount || 0}</span>
               </button>

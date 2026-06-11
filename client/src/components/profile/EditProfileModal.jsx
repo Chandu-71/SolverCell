@@ -28,7 +28,7 @@ const EditProfileModal = ({ user, onClose, onSave }) => {
 
   const fileRef = useRef(null);
 
-  const [avatarPreview, setAvatarPreview] = useState(user.avatarUrl || '/default-avatar.png');
+  const [avatarPreview, setAvatarPreview] = useState(user.avatarUrl);
   const [avatarFile, setAvatarFile] = useState(null);
   const [displayName, setDisplayName] = useState(user.displayName);
   const [username, setUsername] = useState(user.username);
