@@ -1,12 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Heart, MessageCircle, Share2, Bookmark, Users } from 'lucide-react';
+import { Heart, MessageCircle, Share2, Bookmark, Users, Loader2 } from 'lucide-react';
 
 import { useAuth } from '@clerk/react';
 import useCurrentUser from '../hooks/useCurrentUser';
 
 import CommentSection from '../components/CommentSection';
-import Loading from '../components/Loading';
 import ShareModal from '../components/ShareModal';
 
 // ─── helpers ────────────────────────────────────────────────
@@ -345,41 +344,89 @@ const Feed = () => {
   const [attemptedProblems, setAttemptedProblems] = useState([]);
 
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [cursor, setCursor] = useState(null);
+  const [hasMore, setHasMore] = useState(true);
 
+  const loadMoreRef = useRef(null);
+
+  // Fetch user solved/attempted status once
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchUserStatus = async () => {
+      if (!dbUser?.username) return;
+      try {
+        const userRes = await fetch(`${import.meta.env.VITE_API_URL}/api/users/${dbUser.username}/problems`, {
+          cache: 'no-store',
+        });
+        const userData = await userRes.json();
+        if (userData.success) {
+          setSolvedProblems(userData.solved || []);
+          setAttemptedProblems(userData.attempted || []);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchUserStatus();
+  }, [dbUser?.username]);
+
+  // Fetch problems with cursor-based pagination
+  const fetchProblems = useCallback(
+    async (cursorValue = null, append = false) => {
+      if (append) {
+        setLoadingMore(true);
+      } else {
+        setLoading(true);
+      }
+
       try {
         const token = await getToken();
+        const params = new URLSearchParams();
+        if (cursorValue) params.set('cursor', cursorValue);
 
-        // 1. Fetch Feed Problems
-        const feedRes = await fetch(`${import.meta.env.VITE_API_URL}/api/problems`, {
+        const feedRes = await fetch(`${import.meta.env.VITE_API_URL}/api/problems?${params.toString()}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const feedData = await feedRes.json();
-        if (feedData.success) {
-          setProblems(feedData.problems);
-        }
 
-        // 2. Fetch User's Solved/Attempted Status
-        if (dbUser?.username) {
-          const userRes = await fetch(`${import.meta.env.VITE_API_URL}/api/users/${dbUser.username}/problems`, {
-            cache: 'no-store',
-          });
-          const userData = await userRes.json();
-          if (userData.success) {
-            setSolvedProblems(userData.solved || []);
-            setAttemptedProblems(userData.attempted || []);
-          }
+        if (feedData.success) {
+          setProblems(prev => (append ? [...prev, ...feedData.problems] : feedData.problems));
+          setCursor(feedData.nextCursor);
+          setHasMore(feedData.hasMore);
         }
       } catch (error) {
         console.error(error);
       } finally {
         setLoading(false);
+        setLoadingMore(false);
       }
-    };
+    },
+    [getToken],
+  );
 
-    fetchData();
-  }, [dbUser?.username, getToken]);
+  // Initial load
+  useEffect(() => {
+    fetchProblems();
+  }, [fetchProblems]);
+
+  // IntersectionObserver for infinite scroll
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting && hasMore && !loadingMore && !loading) {
+          fetchProblems(cursor, true);
+        }
+      },
+      { threshold: 0.1 },
+    );
+
+    const sentinel = loadMoreRef.current;
+    if (sentinel) {
+      observer.observe(sentinel);
+    }
+
+    return () => observer.disconnect();
+  }, [hasMore, loadingMore, loading, cursor, fetchProblems]);
 
   const filteredProblems = activeTab === 'following' ? problems.filter(problem => problem.author?.isFollowing) : problems;
 
@@ -413,16 +460,35 @@ const Feed = () => {
           <p className='text-slate-500 text-sm'>No problems here yet.</p>
         </div>
       ) : (
-        filteredProblems.map((problem, i) => (
-          <ProblemCard
-            key={problem.id}
-            problem={problem}
-            index={i}
-            getToken={getToken}
-            solvedProblems={solvedProblems}
-            attemptedProblems={attemptedProblems}
-          />
-        ))
+        <>
+          {filteredProblems.map((problem, i) => (
+            <ProblemCard
+              key={problem.id}
+              problem={problem}
+              index={i}
+              getToken={getToken}
+              solvedProblems={solvedProblems}
+              attemptedProblems={attemptedProblems}
+            />
+          ))}
+
+          {/* Sentinel element for IntersectionObserver */}
+          <div ref={loadMoreRef} className='h-4' />
+
+          {/* Loading more indicator */}
+          {loadingMore && (
+            <div className='flex items-center justify-center py-6'>
+              <Loader2 size={24} className='animate-spin text-red-500' />
+            </div>
+          )}
+
+          {/* End of feed indicator */}
+          {!hasMore && filteredProblems.length > 0 && (
+            <div className='py-6 text-center'>
+              <p className='text-xs text-slate-600'>You've reached the end</p>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

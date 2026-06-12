@@ -10,6 +10,8 @@ router.get(
   '/',
   asyncHandler(async (req, res) => {
     const { userId } = getAuth(req);
+    const cursor = req.query.cursor || null;
+    const LIMIT = Math.min(Math.max(parseInt(req.query.limit) || 7, 1), 50);
 
     let currentUser = null;
     let followingIds = new Set();
@@ -33,6 +35,14 @@ router.get(
     }
 
     const problems = await prisma.problem.findMany({
+      take: LIMIT + 1,
+      ...(cursor
+        ? {
+            cursor: { id: cursor },
+            skip: 1,
+          }
+        : {}),
+
       orderBy: {
         createdAt: 'desc',
       },
@@ -71,7 +81,11 @@ router.get(
       },
     });
 
-    const formattedProblems = problems.map(problem => ({
+    const hasMore = problems.length > LIMIT;
+    const slicedProblems = hasMore ? problems.slice(0, LIMIT) : problems;
+    const nextCursor = hasMore ? slicedProblems[slicedProblems.length - 1].id : null;
+
+    const formattedProblems = slicedProblems.map(problem => ({
       id: problem.id,
       slug: problem.slug,
       title: problem.title,
@@ -98,6 +112,8 @@ router.get(
     res.json({
       success: true,
       problems: formattedProblems,
+      nextCursor,
+      hasMore,
     });
   }),
 );
