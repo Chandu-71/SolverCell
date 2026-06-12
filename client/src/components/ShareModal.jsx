@@ -18,7 +18,7 @@ const UserChip = ({ user, selected, onClick }) => (
   <button onClick={onClick} className='flex flex-col items-center gap-1.5 cursor-pointer shrink-0 group'>
     <div className='relative'>
       <img
-        src={user.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`}
+        src={user.avatarUrl}
         alt={user.displayName}
         className={`h-14 w-14 rounded-full border-2 object-cover transition-all ${
           selected ? 'border-red-500 opacity-80' : 'border-white/10 group-hover:border-white/30'
@@ -39,7 +39,7 @@ const UserRow = ({ user, selected, onClick }) => (
   <button onClick={onClick} className='flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 transition hover:bg-white/4'>
     <div className='relative shrink-0'>
       <img
-        src={user.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`}
+        src={user.avatarUrl}
         alt={user.displayName}
         className={`h-10 w-10 rounded-full border-2 object-cover transition ${selected ? 'border-red-500' : 'border-white/10'}`}
       />

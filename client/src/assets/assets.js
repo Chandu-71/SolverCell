@@ -15,7 +15,7 @@ export const assets = {
 export const navbarItems = [
   { label: 'Home', icon: 'Home', path: '/' },
   { label: 'Messages', icon: 'MessageSquare', path: '/messages' },
-  { label: 'Search', icon: 'Search', path: '/discover' },
+  { label: 'Discover', icon: 'Compass', path: '/discover' },
   { label: 'Notifications', icon: 'Bell', path: '/notifications' },
   { label: 'Leaderboard', icon: 'Trophy', path: '/leaderboard' },
 ];

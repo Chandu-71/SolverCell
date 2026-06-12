@@ -1,4 +1,4 @@
-import { Home, MessageSquare, Search, Bell, Plus, Trophy } from 'lucide-react';
+import { Home, MessageSquare, Compass, Bell, Plus, Trophy } from 'lucide-react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { navbarItems, assets } from '../assets/assets';
 
@@ -6,7 +6,7 @@ import useCurrentUser from '../hooks/useCurrentUser';
 import useNotificationCount from '../hooks/useNotificationCount';
 import useUnreadMessagesCount from '../hooks/useUnreadMessagesCount';
 
-const iconMap = { Home, MessageSquare, Search, Bell, Trophy };
+const iconMap = { Home, MessageSquare, Compass, Bell, Trophy };
 
 const LeftSidebar = ({ collapsed = false }) => {
   const navigate = useNavigate();
@@ -104,11 +104,7 @@ const LeftSidebar = ({ collapsed = false }) => {
           aria-label={`View profile of ${user.displayName}`}
           className='mt-auto flex w-full cursor-pointer border border-transparent items-center rounded-2xl p-2 transition-all duration-200 hover:bg-white/5 hover:border-white/10'
         >
-          <img
-            src={user.avatarUrl || '/default-avatar.png'}
-            alt={user.username}
-            className='h-10 w-10 shrink-0 rounded-full border border-white/10 bg-white/10 object-cover'
-          />
+          <img src={user.avatarUrl} alt={user.username} className='h-10 w-10 shrink-0 rounded-full border border-white/10 bg-white/10 object-cover' />
 
           <div
             className={`flex min-w-0 flex-col text-left overflow-hidden transition-all duration-300 ease-in-out ${

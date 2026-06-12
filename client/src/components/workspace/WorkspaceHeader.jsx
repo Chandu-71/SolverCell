@@ -27,10 +27,10 @@ const WorkspaceHeader = ({ problem, onRun, runLoading, onSubmit, submitLoading }
     <header className='flex h-16 items-center justify-between px-6'>
       {/* LEFT */}
       <div className='flex items-center gap-10'>
-        {/* Profile Group: Wraps avatar and text for synchronized hover and click */}
+        {/* Profile Group */}
         <div onClick={() => navigate(`/profile/${author?.username}`)} className='group flex cursor-pointer items-center gap-3'>
           <img
-            src={author?.avatarUrl || '/default-avatar.png'}
+            src={author?.avatarUrl}
             alt={author?.username || 'user'}
             className='h-9 w-9 rounded-full border border-white/10 object-cover transition-colors group-hover:border-red-400 group-hover:border-2'
           />

@@ -36,13 +36,9 @@ const TrendingProblems = () => {
   return (
     <div className='rounded-xl border border-white/10 bg-[#0d0d0d] p-5'>
       {/* Header */}
-      <div className='mb-4 flex items-center justify-between'>
-        <div>
-          <h2 className='text-lg font-semibold text-white'>Trending Problems</h2>
-          <p className='mt-0.5 text-sm text-slate-500'>Based on recent community activity</p>
-        </div>
-
-        <TrendingUp size={16} className='text-red-400' />
+      <div className='mb-4'>
+        <h2 className='text-lg font-semibold text-white'>Trending Problems</h2>
+        <p className='mt-0.5 text-sm text-slate-500'>Based on recent community activity</p>
       </div>
 
       {loading ? (
@@ -93,7 +89,7 @@ const TrendingProblems = () => {
 
                 {/* Right Side: Score */}
                 <div className='flex items-center gap-1.5 shrink-0 pl-2 rounded-md px-2 py-1' title='Trending Activity Score'>
-                  <Flame size={14} className='text-orange-500' />
+                  <TrendingUp size={10} className='text-red-500' />
                   <span className='text-xs font-semibold text-slate-300'>{problem.trendingScore}</span>
                 </div>
               </button>

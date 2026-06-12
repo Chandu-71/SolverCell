@@ -207,7 +207,7 @@ const Notifications = () => {
                                 e.stopPropagation();
                                 navigate(`/profile/${payload.actorUsername}`);
                               }}
-                              src={payload.actorAvatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${payload.actorUsername}`}
+                              src={payload.actorAvatarUrl}
                               alt={payload.actorDisplayName}
                               className='h-12 w-12 shrink-0 cursor-pointer rounded-full border border-white/10 object-cover transition hover:border-red-500 hover:opacity-80'
                             />

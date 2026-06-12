@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@clerk/react';
-import { Trophy, Loader2, Crown, Star, Medal } from 'lucide-react';
+import { Trophy, Loader2, Crown, Star, Award, Shield } from 'lucide-react';
 import LeftSidebar from '../components/LeftSidebar';
 
 // ─── constants ────────────────────────────────────────────────
@@ -24,11 +24,7 @@ const MyRankCard = ({ entry, isWeekly }) => {
   return (
     <div className='rounded-2xl border border-red-500/20 bg-red-500/5 p-4'>
       <div className='flex items-center gap-4'>
-        <img
-          src={entry.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${entry.username}`}
-          alt={entry.displayName}
-          className='h-12 w-12 rounded-full border-2 border-red-500/30 object-cover'
-        />
+        <img src={entry.avatarUrl} alt={entry.displayName} className='h-12 w-12 rounded-full border-2 border-red-500/30 object-cover' />
         <div className='min-w-0 flex-1'>
           <p className='font-semibold text-white'>{entry.displayName}</p>
           <p className='text-sm text-slate-400'>@{entry.username}</p>
@@ -75,8 +71,8 @@ const LeaderboardRow = ({ entry, isMe, isWeekly }) => {
 
   const getRankIcon = rank => {
     if (rank === 1) return <Crown size={16} className='text-amber-400' />;
-    if (rank === 2) return <Medal size={16} className='text-slate-300' />;
-    if (rank === 3) return <Medal size={16} className='text-amber-700' />;
+    if (rank === 2) return <Award size={16} className='text-slate-300' />;
+    if (rank === 3) return <Shield size={16} className='text-amber-700' />;
     return null;
   };
 
@@ -101,11 +97,7 @@ const LeaderboardRow = ({ entry, isMe, isWeekly }) => {
 
       {/* avatar + name */}
       <div className='flex min-w-0 flex-1 items-center gap-3'>
-        <img
-          src={entry.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${entry.username}`}
-          alt={entry.displayName}
-          className='h-9 w-9 shrink-0 rounded-full border border-white/10 object-cover'
-        />
+        <img src={entry.avatarUrl} alt={entry.displayName} className='h-9 w-9 shrink-0 rounded-full border border-white/10 object-cover' />
         <div className='min-w-0'>
           <p className={`truncate text-sm font-semibold ${isMe ? 'text-red-300' : 'text-white'}`}>
             {entry.displayName}

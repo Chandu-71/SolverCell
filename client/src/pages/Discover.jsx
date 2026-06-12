@@ -37,17 +37,19 @@ const DIFF_STYLE = {
 
 const POPULAR_TAGS = [
   'Arrays',
-  'Dynamic Programming',
-  'Graphs',
   'Strings',
-  'Trees',
+  'Stack',
+  'Queue',
   'Binary Search',
-  'Greedy',
-  'Hash Map',
+  'Graphs',
+  'Trees',
   'Sliding Window',
+  'Greedy',
   'BFS',
   'DFS',
+  'Dynamic Programming',
   'Recursion',
+  'Hash Map',
 ];
 
 // ─── helpers ─────────────────────────────────────────────────
@@ -132,18 +134,18 @@ const UserCard = ({ user }) => (
     className='group cursor-pointer flex items-center gap-4 rounded-xl border border-white/10 bg-[#0a0a0a] p-4 transition-all duration-200 hover:border-red-500/40 hover:bg-[#0f0f0f] hover:shadow-lg hover:shadow-red-500/5'
   >
     <img
-      src={user.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`}
+      src={user.avatarUrl}
       alt={user.displayName}
       className='h-12 w-12 rounded-full border-2 border-white/10 object-cover transition-colors group-hover:border-red-500/30'
     />
     <div className='min-w-0 flex-1'>
       <p className='truncate font-semibold text-white transition-colors group-hover:text-red-400'>{user.displayName}</p>
       <p className='text-sm text-slate-400'>@{user.username}</p>
-      {user.bio && <p className='mt-1 truncate text-xs text-slate-500'>{user.bio}</p>}
     </div>
     <div className='shrink-0 text-right'>
-      <p className='text-sm font-bold text-white'>{user.eloRating}</p>
-      <p className='text-xs font-medium text-slate-500'>ELO</p>
+      <p className='text-sm font-bold text-white'>
+        {user.eloRating} <span className='text-xs font-medium text-slate-400'>ELO</span>
+      </p>
       <p className='mt-1 text-xs text-slate-400'>{user.followersCount} followers</p>
     </div>
   </Link>
@@ -212,7 +214,7 @@ const FilterPanel = ({ filters, setFilters, onClear }) => {
 
       {/* tags */}
       <div className='space-y-2'>
-        <p className='text-xs font-semibold uppercase tracking-wider text-slate-500'>Tags</p>
+        <p className='text-xs font-semibold uppercase tracking-wider text-slate-500'>Popular Tags</p>
         <div className='flex flex-wrap gap-1.5'>
           {POPULAR_TAGS.map(tag => {
             const active = filters.tags.includes(tag);
@@ -334,7 +336,7 @@ const Discover = () => {
           {/* ── PAGE HEADER ── */}
           <div className='mb-8'>
             <h1 className='text-3xl font-bold text-white'>Discover</h1>
-            <p className='mt-2 text-sm text-slate-400'>Search problems, users, and topics across the platform.</p>
+            <p className='mt-2 text-sm text-slate-400'>Search problems and users across the platform.</p>
           </div>
 
           {/* ── SEARCH BAR ── */}

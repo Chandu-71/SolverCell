@@ -11,11 +11,7 @@ const ProfileCard = ({ user }) => {
       {/* avatar + name */}
       <Link to='/profile' className='group flex items-center gap-4 transition-all hover:opacity-80'>
         <div className='relative shrink-0'>
-          <img
-            src={user.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`}
-            alt={user.displayName}
-            className='h-16 w-16 rounded-full border border-white/10 object-cover'
-          />
+          <img src={user.avatarUrl} alt={user.displayName} className='h-16 w-16 rounded-full border border-white/10 object-cover' />
         </div>
 
         <div className='min-w-0 flex-1'>
