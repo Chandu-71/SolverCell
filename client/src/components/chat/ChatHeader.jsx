@@ -11,12 +11,11 @@ const ChatHeader = ({ otherUser, isTyping, onBack }) => {
         <ArrowLeft size={18} />
       </button>
 
-      {/* Profile Group: Wraps avatar and text to link hover states and click events */}
       <div onClick={() => navigate(`/profile/${otherUser?.username}`)} className='group flex flex-1 cursor-pointer items-center gap-3'>
         {/* avatar */}
         <div className='relative'>
           <img
-            src={otherUser?.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${otherUser?.username}`}
+            src={otherUser?.avatarUrl}
             alt={otherUser?.displayName}
             className='h-9 w-9 rounded-full border border-white/10 object-cover transition-colors group-hover:border-red-400 group-hover:border-2'
           />

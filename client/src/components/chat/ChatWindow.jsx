@@ -167,13 +167,13 @@ const ChatWindow = ({ conversation, currentUser, onBack }) => {
       <div ref={containerRef} onScroll={handleScroll} className='flex-1 overflow-y-auto px-4 py-3 scrollbar-none'>
         {loadingMore && (
           <div className='flex justify-center py-2'>
-            <Loader2 size={16} className='animate-spin text-slate-600' />
+            <Loader2 size={16} className='animate-spin text-red-400' />
           </div>
         )}
 
         {loading ? (
           <div className='flex h-full items-center justify-center'>
-            <Loader2 size={22} className='animate-spin text-slate-600' />
+            <Loader2 size={22} className='animate-spin text-red-400' />
           </div>
         ) : messages.length === 0 ? (
           <div className='flex h-full flex-col items-center justify-center gap-2 text-center'>

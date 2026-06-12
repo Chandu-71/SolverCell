@@ -86,7 +86,7 @@ router.get(
   }),
 );
 
-// ── POST /api/messages ────────────────────────────────────────
+// ── POST /api/messages ───────────────────────────────────────
 router.post(
   '/',
   asyncHandler(async (req, res) => {

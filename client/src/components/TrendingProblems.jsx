@@ -17,7 +17,7 @@ const TrendingProblems = () => {
   useEffect(() => {
     const fetchTrending = async () => {
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/problems/trending?limit=7`);
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/problems/trending?limit=5`);
         const data = await res.json();
 
         if (data.success) {

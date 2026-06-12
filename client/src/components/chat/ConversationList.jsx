@@ -27,11 +27,7 @@ const ConversationList = ({ conversations, activeId, onSelect }) => {
           >
             {/* avatar + online dot */}
             <div className='relative shrink-0'>
-              <img
-                src={other?.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${other?.username}`}
-                alt={other?.displayName}
-                className='h-11 w-11 rounded-full border border-white/10 object-cover'
-              />
+              <img src={other?.avatarUrl} alt={other?.displayName} className='h-11 w-11 rounded-full border border-white/10 object-cover' />
               {other?.isOnline && <span className='absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-[#0d0d0d] bg-emerald-400' />}
             </div>
 

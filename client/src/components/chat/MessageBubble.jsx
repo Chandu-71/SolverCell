@@ -18,11 +18,7 @@ const MessageBubble = ({ message, isMine, showAvatar, prevSameSender }) => {
       {/* avatar — once per sender group */}
       <div className='w-7 shrink-0'>
         {showAvatar && !isMine && (
-          <img
-            src={message.sender.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${message.sender.username}`}
-            alt={message.sender.displayName}
-            className='h-7 w-7 rounded-full border border-white/10 object-cover'
-          />
+          <img src={message.sender.avatarUrl} alt={message.sender.displayName} className='h-7 w-7 rounded-full border border-white/10 object-cover' />
         )}
       </div>
 
@@ -36,7 +32,7 @@ const MessageBubble = ({ message, isMine, showAvatar, prevSameSender }) => {
               <SharedPostCard problem={message.problem} isMine={isMine} />
             </div>
 
-            {/* caption — below the card, clearly attached */}
+            {/* caption — below the card */}
             {hasCaption && (
               <p
                 className={`px-3.5 py-2.5 text-sm leading-relaxed whitespace-pre-wrap wrap-break-word ${
