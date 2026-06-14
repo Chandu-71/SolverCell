@@ -174,7 +174,7 @@ app.use('/api/search', searchRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/leaderboard', leaderboardRoutes);
 
-app.get('/health', (_, res) => res.json({ status: 'ok' }));
+app.get('/api/ping', (_, res) => res.json({ status: 'ok' }));
 
 app.use(errorHandler);
 

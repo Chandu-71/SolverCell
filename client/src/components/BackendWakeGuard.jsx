@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { assets } from '../assets/assets';
 
-const HEALTH_URL = `${import.meta.env.VITE_API_URL}/health`;
+const HEALTH_URL = `${import.meta.env.VITE_API_URL}/api/ping`;
 const SLOW_THRESHOLD_MS = 3000; // if health takes longer than 3s, backend was asleep
 
 const BackendWakeGuard = ({ children }) => {
