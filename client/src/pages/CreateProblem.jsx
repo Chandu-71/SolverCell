@@ -4,6 +4,7 @@ import { CheckCircle2 } from 'lucide-react';
 import { useAuth } from '@clerk/react';
 
 import LeftSidebar from '../components/LeftSidebar';
+import Footer from '../components/Footer';
 import BasicInfoSection from '../components/create-problem/BasicInfoSection';
 import DescriptionSection from '../components/create-problem/DescriptionSection';
 import TestCasesSection from '../components/create-problem/TestCasesSection';
@@ -137,69 +138,73 @@ const CreateProblemPage = () => {
   }
 
   return (
-    <div className='flex bg-black'>
+    <div className='flex h-screen bg-black text-white'>
       <LeftSidebar workspace />
 
-      <main className='min-h-screen flex-1 bg-black text-white'>
-        <div className='mx-auto max-w-3xl px-6 py-10'>
-          <div className='mb-8'>
-            <h1 className='text-2xl font-bold text-white'>Post a Problem</h1>
-            <p className='mt-1 text-sm text-slate-500'>Share a coding challenge with the community.</p>
-          </div>
+      <div className='min-w-0 flex-1 overflow-y-auto'>
+        <main className='flex-1'>
+          <div className='mx-auto max-w-3xl px-6 py-10'>
+            <div className='mb-8'>
+              <h1 className='text-2xl font-bold text-white'>Post a Problem</h1>
+              <p className='mt-1 text-sm text-slate-500'>Share a coding challenge with the community.</p>
+            </div>
 
-          <div className='space-y-5'>
-            <BasicInfoSection
-              title={title}
-              setTitle={setTitle}
-              summary={summary}
-              setSummary={setSummary}
-              difficulty={difficulty}
-              setDifficulty={setDifficulty}
-              tags={tags}
-              setTags={setTags}
-              errors={errors}
-            />
+            <div className='space-y-5'>
+              <BasicInfoSection
+                title={title}
+                setTitle={setTitle}
+                summary={summary}
+                setSummary={setSummary}
+                difficulty={difficulty}
+                setDifficulty={setDifficulty}
+                tags={tags}
+                setTags={setTags}
+                errors={errors}
+              />
 
-            <DescriptionSection
-              description={description}
-              setDescription={setDescription}
-              constraints={constraints}
-              setConstraints={setConstraints}
-              errors={errors}
-            />
+              <DescriptionSection
+                description={description}
+                setDescription={setDescription}
+                constraints={constraints}
+                setConstraints={setConstraints}
+                errors={errors}
+              />
 
-            <TestCasesSection visibleTC={visibleTC} setVisibleTC={setVisibleTC} hiddenTCs={hiddenTCs} setHiddenTCs={setHiddenTCs} errors={errors} />
+              <TestCasesSection visibleTC={visibleTC} setVisibleTC={setVisibleTC} hiddenTCs={hiddenTCs} setHiddenTCs={setHiddenTCs} errors={errors} />
 
-            {/* ── SUBMIT ── */}
-            <div className='flex items-center justify-between pb-10 pt-2'>
-              <button
-                onClick={() => navigate(-1)}
-                className='cursor-pointer rounded-xl border border-white/8 px-5 py-2.5 text-sm text-slate-400 transition hover:border-white/20 hover:text-white'
-              >
-                Cancel
-              </button>
+              {/* ── SUBMIT ── */}
+              <div className='flex items-center justify-between pb-10 pt-2'>
+                <button
+                  onClick={() => navigate(-1)}
+                  className='cursor-pointer rounded-xl border border-white/8 px-5 py-2.5 text-sm text-slate-400 transition hover:border-white/20 hover:text-white'
+                >
+                  Cancel
+                </button>
 
-              <button
-                onClick={handleSubmit}
-                disabled={submitting}
-                className='flex cursor-pointer items-center gap-2 rounded-xl bg-red-500 px-7 py-2.5 text-sm font-semibold text-white transition hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-60'
-              >
-                {submitting ? (
-                  <>
-                    <svg className='h-4 w-4 animate-spin' viewBox='0 0 24 24' fill='none'>
-                      <circle className='opacity-25' cx='12' cy='12' r='10' stroke='currentColor' strokeWidth='4' />
-                      <path className='opacity-75' fill='currentColor' d='M4 12a8 8 0 018-8v8z' />
-                    </svg>
-                    Posting…
-                  </>
-                ) : (
-                  'Post Problem'
-                )}
-              </button>
+                <button
+                  onClick={handleSubmit}
+                  disabled={submitting}
+                  className='flex cursor-pointer items-center gap-2 rounded-xl bg-red-500 px-7 py-2.5 text-sm font-semibold text-white transition hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-60'
+                >
+                  {submitting ? (
+                    <>
+                      <svg className='h-4 w-4 animate-spin' viewBox='0 0 24 24' fill='none'>
+                        <circle className='opacity-25' cx='12' cy='12' r='10' stroke='currentColor' strokeWidth='4' />
+                        <path className='opacity-75' fill='currentColor' d='M4 12a8 8 0 018-8v8z' />
+                      </svg>
+                      Posting…
+                    </>
+                  ) : (
+                    'Post Problem'
+                  )}
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      </main>
+        </main>
+
+        <Footer />
+      </div>
     </div>
   );
 };

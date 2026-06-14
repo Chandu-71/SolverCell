@@ -5,6 +5,7 @@ import { Heart, MessageCircle, Share2, Bookmark, Users, Loader2 } from 'lucide-r
 import { useAuth } from '@clerk/react';
 import useCurrentUser from '../hooks/useCurrentUser';
 
+import Footer from '../components/Footer';
 import CommentSection from '../components/CommentSection';
 import ShareModal from '../components/ShareModal';
 
@@ -436,60 +437,64 @@ const Feed = () => {
   ];
 
   return (
-    <div className='space-y-4'>
-      {/* Tabs */}
-      <div className='sticky top-0 z-20 flex items-center justify-around rounded-2xl border border-white/8 bg-[#090909]/90 p-2 backdrop-blur-xl'>
-        {tabs.map(tab => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`cursor-pointer rounded-xl mx-2 py-2 w-full text-sm font-medium transition-all duration-200 ${
-              activeTab === tab.id ? 'bg-red-500 text-white shadow-lg shadow-red-500/20' : 'text-slate-400 hover:bg-white/5 hover:text-white'
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
+    <div className='flex min-h-full flex-col justify-between space-y-4'>
+      <div className='space-y-4 flex-1'>
+        {/* Tabs */}
+        <div className='sticky top-0 z-20 flex items-center justify-around rounded-2xl border border-white/8 bg-[#090909]/90 p-2 backdrop-blur-xl'>
+          {tabs.map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`cursor-pointer mx-2 w-full rounded-xl py-2 text-sm font-medium transition-all duration-200 ${
+                activeTab === tab.id ? 'bg-red-500 text-white shadow-lg shadow-red-500/20' : 'text-slate-400 hover:bg-white/5 hover:text-white'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Content */}
+        {loading ? (
+          <FeedSkeleton />
+        ) : filteredProblems.length === 0 ? (
+          <div className='rounded-2xl border border-white/8 bg-black p-12 text-center'>
+            <p className='text-sm text-slate-500'>No problems here yet.</p>
+          </div>
+        ) : (
+          <>
+            {filteredProblems.map((problem, i) => (
+              <ProblemCard
+                key={problem.id}
+                problem={problem}
+                index={i}
+                getToken={getToken}
+                solvedProblems={solvedProblems}
+                attemptedProblems={attemptedProblems}
+              />
+            ))}
+
+            {/* Sentinel element for IntersectionObserver */}
+            <div ref={loadMoreRef} className='h-4' />
+
+            {/* Loading more indicator */}
+            {loadingMore && (
+              <div className='flex items-center justify-center py-6'>
+                <Loader2 size={24} className='animate-spin text-red-500' />
+              </div>
+            )}
+
+            {/* End of feed indicator */}
+            {!hasMore && filteredProblems.length > 0 && (
+              <div className='py-6 text-center'>
+                <p className='text-xs text-slate-600'>You've reached the end</p>
+              </div>
+            )}
+          </>
+        )}
       </div>
 
-      {/* Content */}
-      {loading ? (
-        <FeedSkeleton />
-      ) : filteredProblems.length === 0 ? (
-        <div className='rounded-2xl border border-white/8 bg-black p-12 text-center'>
-          <p className='text-slate-500 text-sm'>No problems here yet.</p>
-        </div>
-      ) : (
-        <>
-          {filteredProblems.map((problem, i) => (
-            <ProblemCard
-              key={problem.id}
-              problem={problem}
-              index={i}
-              getToken={getToken}
-              solvedProblems={solvedProblems}
-              attemptedProblems={attemptedProblems}
-            />
-          ))}
-
-          {/* Sentinel element for IntersectionObserver */}
-          <div ref={loadMoreRef} className='h-4' />
-
-          {/* Loading more indicator */}
-          {loadingMore && (
-            <div className='flex items-center justify-center py-6'>
-              <Loader2 size={24} className='animate-spin text-red-500' />
-            </div>
-          )}
-
-          {/* End of feed indicator */}
-          {!hasMore && filteredProblems.length > 0 && (
-            <div className='py-6 text-center'>
-              <p className='text-xs text-slate-600'>You've reached the end</p>
-            </div>
-          )}
-        </>
-      )}
+      <Footer />
     </div>
   );
 };

@@ -1,22 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import Footer from '../components/Footer';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
-import { useAuth } from '@clerk/react';
-import {
-  Search,
-  SlidersHorizontal,
-  X,
-  Users,
-  Code2,
-  CheckCircle2,
-  Heart,
-  Zap,
-  ChevronDown,
-  Loader2,
-  TrendingUp,
-  Clock,
-  Star,
-  Filter,
-} from 'lucide-react';
+import { Search, X, Users, Code2, CheckCircle2, Heart, Zap, ChevronDown, Loader2, TrendingUp, Clock, Star, Filter } from 'lucide-react';
 import LeftSidebar from '../components/LeftSidebar';
 
 // ─── constants ────────────────────────────────────────────────
@@ -324,15 +309,15 @@ const Discover = () => {
   const showUsers = activeTab !== 'problems';
 
   return (
-    <div className='flex min-h-screen bg-black text-white'>
+    <div className='flex h-screen bg-black text-white'>
       {/* LEFT SIDEBAR */}
       <aside className='hidden lg:block shrink-0'>
         <LeftSidebar />
       </aside>
 
       {/* MAIN */}
-      <div className='flex w-full flex-col'>
-        <div className='mx-auto w-full max-w-7xl px-6 py-8'>
+      <div className='min-w-0 flex-1 overflow-y-auto'>
+        <div className='mx-auto min-h-full w-full max-w-7xl px-6 py-8'>
           {/* ── PAGE HEADER ── */}
           <div className='mb-8'>
             <h1 className='text-3xl font-bold text-white'>Discover</h1>
@@ -504,6 +489,8 @@ const Discover = () => {
             </div>
           </div>
         </div>
+
+        <Footer />
       </div>
     </div>
   );

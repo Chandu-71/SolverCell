@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@clerk/react';
 import { Trophy, Loader2, Crown, Star, Award, Shield } from 'lucide-react';
 import LeftSidebar from '../components/LeftSidebar';
+import Footer from '../components/Footer';
 
 // ─── constants ────────────────────────────────────────────────
 const RANK_ROW_STYLE = {
@@ -175,13 +176,13 @@ const Leaderboard = () => {
   const isWeekly = tab === 'weekly';
 
   return (
-    <div className='flex min-h-screen bg-black text-white'>
+    <div className='flex h-screen bg-black text-white'>
       <aside className='hidden lg:block shrink-0'>
         <LeftSidebar />
       </aside>
 
       <div className='min-w-0 flex-1 overflow-y-auto'>
-        <div className='mx-auto max-w-3xl px-6 py-8'>
+        <div className='mx-auto min-h-full max-w-3xl px-6 py-8'>
           {/* ── PAGE HEADER ── */}
           <div className='mb-6 flex items-center gap-4'>
             <div className='flex h-12 w-12 items-center justify-center rounded-2xl bg-red-500/10'>
@@ -273,6 +274,8 @@ const Leaderboard = () => {
             </p>
           )}
         </div>
+
+        <Footer />
       </div>
     </div>
   );

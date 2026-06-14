@@ -6,6 +6,7 @@ import useCurrentUser from '../hooks/useCurrentUser';
 import Loading from '../components/Loading';
 
 import LeftSidebar from '../components/LeftSidebar';
+import Footer from '../components/Footer';
 import FollowModal from '../components/profile/FollowModal';
 import EditProfileModal from '../components/profile/EditProfileModal';
 import MyPosts from '../components/profile/MyPosts';
@@ -242,15 +243,15 @@ const Profile = () => {
   ];
 
   return (
-    <main className='min-h-screen bg-black text-white'>
-      <div className='mx-auto flex gap-6'>
-        {/* LEFT SIDEBAR */}
-        <aside className='hidden lg:block'>
-          <LeftSidebar />
-        </aside>
+    <main className='flex h-screen bg-black text-white'>
+      {/* LEFT SIDEBAR */}
+      <aside className='hidden lg:block shrink-0'>
+        <LeftSidebar />
+      </aside>
 
+      <div className='min-w-0 flex-1 overflow-y-auto'>
         {/* MAIN PROFILE CONTENT */}
-        <section className='min-w-0 flex-1 py-6 pr-6'>
+        <section className='min-w-0 min-h-full py-6 px-6'>
           <div className='overflow-hidden rounded-3xl border border-white/5 bg-[#050505]'>
             <div className='p-8'>
               {/* HEADER ROW */}
@@ -404,6 +405,8 @@ const Profile = () => {
             <MyPosts key={profile.username} profile={profile} />
           </div>
         </section>
+
+        <Footer />
       </div>
 
       {/* ── MODALS ── */}
