@@ -212,9 +212,9 @@ router.post(
               });
 
               if (!tag) {
-                tag = {
+                tag = await prisma.tag.create({
                   data: { name: tagName },
-                };
+                });
               }
 
               return {
