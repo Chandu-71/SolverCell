@@ -33,8 +33,18 @@ const MyRankCard = ({ entry, isWeekly }) => {
 
         {/* rank badge */}
         <div className='text-right'>
-          <p className='text-2xl font-extrabold text-red-400'>#{entry.rank}</p>
-          {!entry.inTop100 && <p className='text-xs text-slate-500'>Top {entry.percentile}%</p>}
+          {entry.rank != null ? (
+            <>
+              <p className='text-2xl font-extrabold text-red-400'>#{entry.rank}</p>
+
+              {!entry.inTop100 && entry.percentile != null && <p className='text-xs text-slate-500'>Top {entry.percentile}%</p>}
+            </>
+          ) : (
+            <>
+              <p className='text-sm font-semibold text-slate-300'>Unranked This Week</p>
+              <p className='text-xs text-slate-500'>Solve problems to earn weekly points</p>
+            </>
+          )}
         </div>
       </div>
 
@@ -42,7 +52,8 @@ const MyRankCard = ({ entry, isWeekly }) => {
         {isWeekly ? (
           <>
             <span className='text-slate-400'>
-              Current Rank: <span className='font-semibold text-white'>#{entry.rank}</span>
+              Current Rank:
+              <span className='font-semibold text-white'>{entry.rank != null ? `#${entry.rank}` : '—'}</span>
             </span>
             <span className='text-slate-400'>
               Current Score: <span className='font-semibold text-white'>{entry.weeklyScore} pts</span>

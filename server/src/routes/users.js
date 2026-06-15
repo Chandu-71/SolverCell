@@ -9,14 +9,14 @@ const router = express.Router();
 const enrichUser = async user => {
   const [aboveMe, aboveMeWeekly] = await Promise.all([
     prisma.user.count({ where: { eloRating: { gt: user.eloRating } } }),
-    prisma.user.count({ where: { weeklyScore: { gt: user.weeklyScore } } }),
+    user.weeklyScore > 0 ? prisma.user.count({ where: { weeklyScore: { gt: user.weeklyScore } } }) : Promise.resolve(null),
   ]);
 
   return {
     ...user,
     currentStreak: getActiveStreak(user.currentStreak, user.lastSolvedAt),
     currentRank: aboveMe + 1,
-    weeklyRank: aboveMeWeekly + 1,
+    weeklyRank: aboveMeWeekly != null ? aboveMeWeekly + 1 : null,
   };
 };
 
@@ -394,10 +394,10 @@ router.get(
     // Compute ranks dynamically
     const [aboveMe, aboveMeWeekly] = await Promise.all([
       prisma.user.count({ where: { eloRating: { gt: user.eloRating } } }),
-      prisma.user.count({ where: { weeklyScore: { gt: user.weeklyScore } } }),
+      user.weeklyScore > 0 ? prisma.user.count({ where: { weeklyScore: { gt: user.weeklyScore } } }) : Promise.resolve(null),
     ]);
     const currentRank = aboveMe + 1;
-    const weeklyRank = aboveMeWeekly + 1;
+    const weeklyRank = aboveMeWeekly != null ? aboveMeWeekly + 1 : null;
 
     res.json({
       success: true,

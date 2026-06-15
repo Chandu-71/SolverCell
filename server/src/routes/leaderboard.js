@@ -51,6 +51,7 @@ router.get(
     }));
 
     const totalUsers = await prisma.user.count();
+    const rankPopulation = isWeekly ? await prisma.user.count({ where: { weeklyScore: { gt: 0 } } }) : totalUsers;
 
     let myEntry = null;
     if (userId) {
@@ -61,8 +62,12 @@ router.get(
 
       if (me) {
         const inList = leaderboard.find(u => u.id === me.id);
+        // If weekly tab and user hasn't scored, they are unranked
+        const hasParticipated = !isWeekly || me.weeklyScore > 0;
         let myRank;
-        if (inList) {
+        if (!hasParticipated) {
+          myRank = null;
+        } else if (inList) {
           myRank = inList.rank;
         } else {
           const aboveMe = await prisma.user.count({
@@ -71,7 +76,7 @@ router.get(
           myRank = aboveMe + 1;
         }
 
-        const percentile = Math.ceil((myRank / Math.max(totalUsers, 1)) * 100);
+        const percentile = myRank != null ? Math.ceil((myRank / Math.max(rankPopulation, 1)) * 100) : null;
 
         myEntry = {
           rank: myRank,
