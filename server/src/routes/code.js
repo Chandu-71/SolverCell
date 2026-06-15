@@ -31,12 +31,32 @@ const runCode = async (code, compiler, stdin = '') => {
     body: JSON.stringify({
       compiler,
       code,
-      input: stdin,
+      input: String(stdin || ''),
     }),
   });
 
-  const data = await response.json();
-  return data;
+  let data;
+  try {
+    data = await response.json();
+  } catch (error) {
+    return {
+      status: 'failed',
+      error: 'Unable to parse OnlineCompiler response',
+      output: '',
+      exit_code: null,
+      time: null,
+      memory: null,
+    };
+  }
+
+  return {
+    status: data?.status || 'failed',
+    error: data?.error || (response.ok ? '' : `OnlineCompiler API returned ${response.status}`),
+    output: data?.output || '',
+    exit_code: data?.exit_code ?? null,
+    time: data?.time,
+    memory: data?.memory,
+  };
 };
 
 router.post(
@@ -164,19 +184,26 @@ router.post(
     for (const testCase of hiddenCases) {
       const result = await runCode(code, compiler, testCase.input);
 
-      // Check for errors and compilation/runtime issues
+      // Check for errors, compilation issues, runtime issues, or internal API failures
       if (result.status !== 'success') {
-        if (result.error && result.exit_code && result.exit_code !== 0) {
-          // Determine if it's a compilation error or runtime error
-          // Exit codes: 0 = success, 1 = runtime error, 124 = timeout, 137 = memory limit
-          if (result.exit_code === 1 || result.exit_code > 128) {
-            finalStatus = 'RUNTIME_ERROR';
-          } else {
-            finalStatus = 'COMPILATION_ERROR';
-          }
-          errorMessage = result.error;
-          break;
+        errorMessage = result.error || 'Unknown OnlineCompiler error';
+
+        if (result.exit_code === 124) {
+          finalStatus = 'TIME_LIMIT_EXCEEDED';
+        } else if (result.exit_code === 137 || result.exit_code === 1 || result.exit_code > 128) {
+          finalStatus = 'RUNTIME_ERROR';
+        } else {
+          finalStatus = 'COMPILATION_ERROR';
         }
+
+        console.error(`Submission failed for problem ${problemId} on hidden case ${testCase.label}:`, {
+          status: result.status,
+          exit_code: result.exit_code,
+          error: result.error,
+          output: result.output,
+        });
+
+        break;
       }
 
       const actual = (result.output || '').trim();
