@@ -174,7 +174,7 @@ const Notifications = () => {
 
                 <h2 className='text-lg font-semibold text-slate-300'>No notifications yet</h2>
 
-                <p className='mt-1 text-sm text-slate-600'>Likes, comments and follows will appear here.</p>
+                <p className='mt-1 text-sm text-slate-600'>Community activity on your problems and profile will appear here.</p>
               </div>
             ) : (
               <div className='space-y-8'>
@@ -235,9 +235,7 @@ const Notifications = () => {
                                   <div className='min-w-0 flex-1'>
                                     {/* text */}
                                     <p className='text-sm leading-relaxed text-slate-300'>
-                                      <span className='font-semibold text-white'>
-                                        {actor?.username ? `@${actor.username}` : 'Deleted user'}
-                                      </span>{' '}
+                                      <span className='font-semibold text-white'>{actor?.username ? `@${actor.username}` : 'Deleted user'}</span>{' '}
                                       {notification.type === 'NEW_FOLLOWER' && <>started following you</>}
                                       {notification.type === 'PROBLEM_LIKED' && <>liked your problem</>}
                                       {notification.type === 'PROBLEM_COMMENTED' && (

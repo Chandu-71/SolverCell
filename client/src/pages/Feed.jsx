@@ -335,7 +335,7 @@ const ProblemCard = ({ problem, index, getToken, solvedProblems = [], attemptedP
 };
 
 // ─── Feed ────────────────────────────────────────────────────
-const Feed = () => {
+const Feed = ({ feedContainerRef }) => {
   const { getToken } = useAuth();
   const { user: dbUser } = useCurrentUser();
   const [activeTab, setActiveTab] = useState('forYou');
@@ -350,6 +350,17 @@ const Feed = () => {
   const [hasMore, setHasMore] = useState(true);
 
   const loadMoreRef = useRef(null);
+
+  const handleTabChange = tab => {
+    setActiveTab(tab);
+
+    requestAnimationFrame(() => {
+      feedContainerRef.current?.scrollTo({
+        top: 0,
+        behavior: 'smooth',
+      });
+    });
+  };
 
   // Fetch user solved/attempted status once
   useEffect(() => {
@@ -444,7 +455,7 @@ const Feed = () => {
           {tabs.map(tab => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => handleTabChange(tab.id)}
               className={`cursor-pointer mx-2 w-full rounded-xl py-2 text-sm font-medium transition-all duration-200 ${
                 activeTab === tab.id ? 'bg-red-500 text-white shadow-lg shadow-red-500/20' : 'text-slate-400 hover:bg-white/5 hover:text-white'
               }`}
