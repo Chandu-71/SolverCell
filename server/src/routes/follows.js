@@ -55,9 +55,6 @@ router.post(
       type: 'NEW_FOLLOWER',
       payload: {
         actorId: currentUser.id,
-        actorUsername: currentUser.username,
-        actorDisplayName: currentUser.displayName,
-        actorAvatarUrl: currentUser.avatarUrl,
       },
     });
 

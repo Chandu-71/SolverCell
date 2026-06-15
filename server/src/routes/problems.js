@@ -375,9 +375,6 @@ router.post(
         type: 'PROBLEM_LIKED',
         payload: {
           actorId: dbUser.id,
-          actorUsername: dbUser.username,
-          actorDisplayName: dbUser.displayName,
-          actorAvatarUrl: dbUser.avatarUrl,
 
           problemId: problem.id,
           problemTitle: problem.title,
@@ -908,9 +905,6 @@ router.post(
       type: 'PROBLEM_COMMENTED',
       payload: {
         actorId: dbUser.id,
-        actorUsername: dbUser.username,
-        actorDisplayName: dbUser.displayName,
-        actorAvatarUrl: dbUser.avatarUrl,
 
         problemId: problem.id,
         problemTitle: problem.title,

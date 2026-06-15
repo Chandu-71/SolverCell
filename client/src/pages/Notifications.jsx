@@ -121,7 +121,9 @@ const Notifications = () => {
     const payload = notification.payload;
 
     if (notification.type === 'NEW_FOLLOWER') {
-      navigate(`/profile/${payload.actorUsername}`);
+      if (payload.actor?.username) {
+        navigate(`/profile/${payload.actor.username}`);
+      }
       return;
     }
 
@@ -196,6 +198,7 @@ const Notifications = () => {
                       <div className='space-y-3'>
                         {items.map(notification => {
                           const payload = notification.payload;
+                          const actor = payload.actor;
 
                           return (
                             <button
@@ -204,15 +207,27 @@ const Notifications = () => {
                               className='flex w-full cursor-pointer items-center gap-4 rounded-2xl border border-white/6 bg-[#0f0f0f] p-4 text-left transition hover:border-white/10 hover:bg-[#151515]'
                             >
                               {/* actor avatar */}
-                              <img
-                                onClick={e => {
-                                  e.stopPropagation();
-                                  navigate(`/profile/${payload.actorUsername}`);
-                                }}
-                                src={payload.actorAvatarUrl}
-                                alt={payload.actorDisplayName}
-                                className='h-12 w-12 shrink-0 cursor-pointer rounded-full border border-white/10 object-cover transition hover:border-red-500 hover:opacity-80'
-                              />
+                              {actor?.avatarUrl ? (
+                                <img
+                                  onClick={e => {
+                                    e.stopPropagation();
+                                    navigate(`/profile/${actor.username}`);
+                                  }}
+                                  src={actor.avatarUrl}
+                                  alt={actor.username}
+                                  className='h-12 w-12 shrink-0 cursor-pointer rounded-full border-2 border-white/10 object-cover transition hover:border-red-500 hover:opacity-80'
+                                />
+                              ) : (
+                                <div
+                                  onClick={e => {
+                                    e.stopPropagation();
+                                    if (actor?.username) navigate(`/profile/${actor.username}`);
+                                  }}
+                                  className='flex h-12 w-12 shrink-0 cursor-pointer items-center justify-center rounded-full border border-white/10 bg-white/5 text-lg font-semibold text-slate-400 transition hover:border-red-500 hover:opacity-80 uppercase'
+                                >
+                                  {actor?.username?.[0] || '?'}
+                                </div>
+                              )}
 
                               {/* body */}
                               <div className='min-w-0 flex-1'>
@@ -220,7 +235,9 @@ const Notifications = () => {
                                   <div className='min-w-0 flex-1'>
                                     {/* text */}
                                     <p className='text-sm leading-relaxed text-slate-300'>
-                                      <span className='font-semibold text-white'>{payload.actorDisplayName}</span>{' '}
+                                      <span className='font-semibold text-white'>
+                                        {actor?.username ? `@${actor.username}` : 'Deleted user'}
+                                      </span>{' '}
                                       {notification.type === 'NEW_FOLLOWER' && <>started following you</>}
                                       {notification.type === 'PROBLEM_LIKED' && <>liked your problem</>}
                                       {notification.type === 'PROBLEM_COMMENTED' && (

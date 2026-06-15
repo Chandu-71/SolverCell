@@ -251,9 +251,6 @@ router.post(
             type: 'PROBLEM_SOLVED',
             payload: {
               actorId: dbUser.id,
-              actorUsername: dbUser.username,
-              actorDisplayName: dbUser.displayName,
-              actorAvatarUrl: dbUser.avatarUrl,
               problemId,
               problemTitle: problem.title,
               runtime: finalRuntime,

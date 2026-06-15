@@ -39,9 +39,34 @@ router.get(
       take: 50,
     });
 
+    // collect unique actor IDs from all notification payloads
+    const actorIds = [...new Set(notifications.map(n => n.payload?.actorId).filter(Boolean))];
+
+    // batch-fetch current actor profiles
+    const actors = actorIds.length
+      ? await prisma.user.findMany({
+          where: { id: { in: actorIds } },
+          select: { id: true, username: true, avatarUrl: true },
+        })
+      : [];
+
+    const actorMap = Object.fromEntries(actors.map(a => [a.id, a]));
+
+    // inject live actor data into each notification payload
+    const enriched = notifications.map(n => {
+      const actor = actorMap[n.payload?.actorId] || null;
+      return {
+        ...n,
+        payload: {
+          ...n.payload,
+          actor, // { id, username, displayName, avatarUrl } or null (deleted user)
+        },
+      };
+    });
+
     res.json({
       success: true,
-      notifications,
+      notifications: enriched,
     });
   }),
 );
