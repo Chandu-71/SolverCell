@@ -8,17 +8,16 @@ const ELO_REWARDS = {
 
 const startOfDay = date => {
   const d = new Date(date);
-  d.setHours(0, 0, 0, 0);
+  d.setUTCHours(0, 0, 0, 0);
   return d;
 };
 
 export const getWeekStart = date => {
   const d = new Date(date);
-  const day = d.getDay(); // 0 = Sunday, 1 = Monday
+  const day = d.getUTCDay(); // 0 = Sunday, 1 = Monday
   const daysSinceMonday = (day + 6) % 7;
-  d.setDate(d.getDate() - daysSinceMonday);
-  d.setHours(0, 0, 0, 0);
-  d.setMilliseconds(0);
+  d.setUTCDate(d.getUTCDate() - daysSinceMonday);
+  d.setUTCHours(0, 0, 0, 0);
   return d;
 };
 
