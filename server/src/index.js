@@ -187,9 +187,18 @@ const finalizePreviousWeek = async () => {
   console.log('[weekly] Finalizing previous week leaderboard…');
   const currentWeekStart = getWeekStart(new Date());
 
+  // Initialize any users that have null weeklyScoreWeekStart.
+  // This prevents new users or unranked users from triggering a global reset
+  // or getting their own scores wiped out inappropriately.
+  await prisma.user.updateMany({
+    where: { weeklyScoreWeekStart: null },
+    data: { weeklyScoreWeekStart: currentWeekStart },
+  });
+
+  // Count ONLY genuinely stale users (from a previous week)
   const staleUserCount = await prisma.user.count({
     where: {
-      OR: [{ weeklyScoreWeekStart: null }, { weeklyScoreWeekStart: { lt: currentWeekStart } }],
+      weeklyScoreWeekStart: { lt: currentWeekStart },
     },
   });
 
@@ -202,7 +211,7 @@ const finalizePreviousWeek = async () => {
   try {
     const participants = await prisma.user.findMany({
       where: {
-        OR: [{ weeklyScoreWeekStart: null }, { weeklyScoreWeekStart: { lt: currentWeekStart } }],
+        weeklyScoreWeekStart: { lt: currentWeekStart },
         weeklyScore: { gt: 0 },
       },
       orderBy: [{ weeklyScore: 'desc' }, { username: 'asc' }],
@@ -229,7 +238,7 @@ const finalizePreviousWeek = async () => {
 
     const { count } = await prisma.user.updateMany({
       where: {
-        OR: [{ weeklyScoreWeekStart: null }, { weeklyScoreWeekStart: { lt: currentWeekStart } }],
+        weeklyScoreWeekStart: { lt: currentWeekStart },
       },
       data: {
         weeklyScore: 0,
