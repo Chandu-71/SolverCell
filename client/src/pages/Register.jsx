@@ -144,6 +144,10 @@ const Register = () => {
     { src: assets.shot2, label: 'Problems' },
     { src: assets.shot3, label: 'Feed' },
     { src: assets.shot4, label: 'Profile' },
+    { src: assets.shot5, label: 'Leaderboard' },
+    { src: assets.shot6, label: 'Notifications' },
+    { src: assets.shot7, label: 'Create Problem' },
+    { src: assets.shot8, label: 'Discover' },
   ];
 
   useEffect(() => {

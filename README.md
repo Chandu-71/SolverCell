@@ -28,9 +28,13 @@ A social-first competitive programming platform where developers create, solve, 
 | | |
 |:---:|:---:|
 | ![Feed](client/src/assets/shot1.png) | ![Workspace](client/src/assets/shot2.png) |
-| **Home Feed** — Browse, like, comment, and bookmark problems from people you follow | **Code Workspace** — Split-pane IDE with Monaco Editor, problem description, and custom test cases |
+| **Home Feed** — Browse, like, comment, bookmark, and discover coding challenges from the community | **Code Workspace** — Split-pane IDE with Monaco Editor, problem description, and custom test cases |
 | ![Messages](client/src/assets/shot3.png) | ![Profile](client/src/assets/shot4.png) |
 | **Real-time Chat** — DM other developers, share problems inline, and see typing/read indicators | **Profile Dashboard** — ELO rating, solve streaks, leaderboard ranks, and authored problems |
+| ![Leaderboard](client/src/assets/shot5.png) | ![Notifications](client/src/assets/shot6.png) |
+| **Competitive Leaderboard** — Weekly and all-time rankings with ELO-based progression and community standings | **Notification Center** — Real-time alerts for follows, likes, comments, messages, and problem activity |
+| ![CreateProblem](client/src/assets/shot7.png) | ![Discover](client/src/assets/shot8.png) |
+| **Problem Creation** — Design challenges with descriptions, constraints, tags, visible and hidden test cases | **Discover & Search** — Search users and coding challenges with filters for difficulty, tags, and problem attributes |
 
 </div>
 

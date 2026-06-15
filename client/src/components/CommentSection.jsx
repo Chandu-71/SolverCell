@@ -67,7 +67,7 @@ const CommentItem = ({ comment, currentUserId, onDelete, isDeleting }) => {
         <button
           onClick={() => onDelete(comment.id)}
           disabled={isDeleting}
-          className='shrink-0 rounded-lg px-3 text-slate-500 cursor-pointer transition-all hover:bg-red-500/10 hover:text-red-400 disabled:opacity-50'
+          className='shrink-0 rounded-lg px-3 h-10 text-slate-500 cursor-pointer transition-all hover:bg-red-500/10 hover:text-red-400 disabled:opacity-50'
         >
           {isDeleting ? <Loader2 size={13} className='animate-spin' /> : <Trash2 size={13} />}
         </button>

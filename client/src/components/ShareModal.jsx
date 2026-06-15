@@ -324,7 +324,7 @@ const ShareModal = ({ problem, onClose, onShared }) => {
           >
             {sent ? (
               <>
-                <CheckCircle2 size={16} className='text-emerald-300' /> Sent!
+                <CheckCircle2 size={16} className='text-white' /> Sent!
               </>
             ) : sending ? (
               <>

@@ -3,6 +3,10 @@ import shot1 from './shot1.png';
 import shot2 from './shot2.png';
 import shot3 from './shot3.png';
 import shot4 from './shot4.png';
+import shot5 from './shot5.png';
+import shot6 from './shot6.png';
+import shot7 from './shot7.png';
+import shot8 from './shot8.png';
 
 export const assets = {
   logo,
@@ -10,6 +14,10 @@ export const assets = {
   shot2,
   shot3,
   shot4,
+  shot5,
+  shot6,
+  shot7,
+  shot8,
 };
 
 export const navbarItems = [
