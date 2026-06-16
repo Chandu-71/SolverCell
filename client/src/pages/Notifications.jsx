@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@clerk/react';
-import { Bell, Loader2 } from 'lucide-react';
+import { Bell, Loader2, Heart, MessageCircle, UserPlus, Check } from 'lucide-react';
 import { formatDistanceToNow, isToday, isYesterday, isThisWeek } from 'date-fns';
 
 import LeftSidebar from '../components/LeftSidebar';
@@ -40,6 +40,44 @@ const groupNotifications = notifications => {
   });
 
   return groups;
+};
+
+// Corner badge mapping helper
+const getNotificationBadge = type => {
+  const baseClass = 'absolute -bottom-1 -right-1 flex h-4 w-4 sm:h-5 sm:w-5 items-center justify-center rounded-full ring-2 ring-[#0f0f0f]';
+
+  switch (type) {
+    case 'PROBLEM_LIKED':
+      return (
+        <div className={`${baseClass} bg-red-500`}>
+          <Heart size={10} className='text-white' fill='currentColor' />
+        </div>
+      );
+    case 'PROBLEM_COMMENTED':
+      return (
+        <div className={`${baseClass} bg-emerald-500`}>
+          <MessageCircle size={10} className='text-white' fill='currentColor' />
+        </div>
+      );
+    case 'NEW_FOLLOWER':
+      return (
+        <div className={`${baseClass} bg-blue-500`}>
+          <UserPlus size={10} className='text-white' />
+        </div>
+      );
+    case 'PROBLEM_SOLVED':
+      return (
+        <div className={`${baseClass} bg-amber-500`}>
+          <Check size={11} className='text-white' strokeWidth={3} />
+        </div>
+      );
+    default:
+      return (
+        <div className={`${baseClass} bg-slate-600`}>
+          <Bell size={10} className='text-white' />
+        </div>
+      );
+  }
 };
 
 const Notifications = () => {
@@ -207,28 +245,32 @@ const Notifications = () => {
                               onClick={() => handleClick(notification)}
                               className='flex w-full cursor-pointer items-start sm:items-center gap-3 sm:gap-4 rounded-2xl border border-white/6 bg-[#0f0f0f] p-3 sm:p-4 text-left transition hover:border-white/10 hover:bg-[#151515]'
                             >
-                              {/* actor avatar */}
-                              {actor?.avatarUrl ? (
-                                <img
-                                  onClick={e => {
-                                    e.stopPropagation();
-                                    navigate(`/profile/${actor.username}`);
-                                  }}
-                                  src={actor.avatarUrl}
-                                  alt={actor.username}
-                                  className='h-10 w-10 sm:h-12 sm:w-12 shrink-0 cursor-pointer rounded-full border-2 border-white/10 object-cover transition hover:border-red-500 hover:opacity-80'
-                                />
-                              ) : (
-                                <div
-                                  onClick={e => {
-                                    e.stopPropagation();
-                                    if (actor?.username) navigate(`/profile/${actor.username}`);
-                                  }}
-                                  className='flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 cursor-pointer items-center justify-center rounded-full border border-white/10 bg-white/5 text-base sm:text-lg font-semibold text-slate-400 transition hover:border-red-500 hover:opacity-80 uppercase'
-                                >
-                                  {actor?.username?.[0] || '?'}
-                                </div>
-                              )}
+                              {/* actor avatar wrapper */}
+                              <div className='relative shrink-0'>
+                                {actor?.avatarUrl ? (
+                                  <img
+                                    onClick={e => {
+                                      e.stopPropagation();
+                                      navigate(`/profile/${actor.username}`);
+                                    }}
+                                    src={actor.avatarUrl}
+                                    alt={actor.username}
+                                    className='h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-white/10 object-cover transition hover:border-red-500 hover:opacity-80'
+                                  />
+                                ) : (
+                                  <div
+                                    onClick={e => {
+                                      e.stopPropagation();
+                                      if (actor?.username) navigate(`/profile/${actor.username}`);
+                                    }}
+                                    className='flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full border border-white/10 bg-white/5 text-base sm:text-lg font-semibold text-slate-400 transition hover:border-red-500 hover:opacity-80 uppercase'
+                                  >
+                                    {actor?.username?.[0] || '?'}
+                                  </div>
+                                )}
+                                {/* Dynamic Overlay Icon */}
+                                {getNotificationBadge(notification.type)}
+                              </div>
 
                               {/* body */}
                               <div className='min-w-0 flex-1'>
