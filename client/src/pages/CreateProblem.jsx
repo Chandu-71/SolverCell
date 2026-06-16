@@ -4,6 +4,7 @@ import { CheckCircle2 } from 'lucide-react';
 import { useAuth } from '@clerk/react';
 
 import LeftSidebar from '../components/LeftSidebar';
+import MobileBottomNav from '../components/MobileBottomNav';
 import Footer from '../components/Footer';
 import BasicInfoSection from '../components/create-problem/BasicInfoSection';
 import DescriptionSection from '../components/create-problem/DescriptionSection';
@@ -139,9 +140,11 @@ const CreateProblemPage = () => {
 
   return (
     <div className='flex h-screen bg-black text-white'>
-      <LeftSidebar workspace />
+      <aside className='hidden lg:flex shrink-0'>
+        <LeftSidebar workspace />
+      </aside>
 
-      <div className='min-w-0 flex-1 overflow-y-auto'>
+      <div className='min-w-0 flex-1 overflow-y-auto pb-20 lg:pb-0'>
         <main className='flex-1'>
           <div className='mx-auto max-w-3xl px-6 py-10'>
             <div className='mb-8'>
@@ -205,6 +208,8 @@ const CreateProblemPage = () => {
 
         <Footer />
       </div>
+
+      <MobileBottomNav />
     </div>
   );
 };

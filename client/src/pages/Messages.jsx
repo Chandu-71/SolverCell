@@ -4,6 +4,7 @@ import { useAuth } from '@clerk/react';
 import { Search, X, Loader2, MessageSquare, UserX } from 'lucide-react';
 
 import LeftSidebar from '../components/LeftSidebar';
+import MobileBottomNav from '../components/MobileBottomNav';
 import ConversationList from '../components/chat/ConversationList';
 import ChatWindow from '../components/chat/ChatWindow';
 
@@ -262,10 +263,16 @@ const Messages = () => {
 
   return (
     <div className='flex h-screen overflow-hidden bg-black text-white'>
-      <LeftSidebar collapsed={true} />
+      <div className='hidden lg:flex'>
+        <LeftSidebar collapsed={true} />
+      </div>
 
       {/* CHAT SIDEBAR */}
-      <div className={`ml-20 flex h-full w-full shrink-0 flex-col border-r border-white/6 lg:w-80 xl:w-96 ${activeConv ? 'hidden lg:flex' : 'flex'}`}>
+      <div
+        className={`lg:ml-20 flex h-full w-full shrink-0 flex-col border-r border-white/6 lg:w-80 xl:w-96 pb-14 lg:pb-0 ${
+          activeConv ? 'hidden lg:flex' : 'flex'
+        }`}
+      >
         <div className='flex shrink-0 items-center justify-between border-b border-white/6 px-4 py-4.5'>
           <h2 className='text-base font-bold text-white'>Messages</h2>
           <MessageSquare size={18} className='text-slate-600' />
@@ -302,6 +309,9 @@ const Messages = () => {
           </div>
         )}
       </div>
+
+      {/* HIDE BOTTOM NAV IF ACTIVELY IN A CHAT */}
+      {!activeConv && <MobileBottomNav />}
     </div>
   );
 };

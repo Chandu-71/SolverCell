@@ -85,7 +85,7 @@ const MessageInput = ({ conversationId, onTypingStart, onTypingStop }) => {
           className='max-h-32 flex-1 resize-none rounded-xl border border-white/8 bg-[#141414] px-4 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition focus:border-red-500/40 focus:ring-1 focus:ring-red-500/10'
           style={{ lineHeight: '1.5' }}
           onInput={e => {
-            e.target.style.height = 'auto';
+            e.target.style.height = '0px';
             e.target.style.height = Math.min(e.target.scrollHeight, 128) + 'px';
           }}
         />

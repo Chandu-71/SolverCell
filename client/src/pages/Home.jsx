@@ -2,6 +2,7 @@ import { useRef } from 'react';
 
 import LeftSidebar from '../components/LeftSidebar';
 import RightSidebar from '../components/RightSidebar';
+import MobileBottomNav from '../components/MobileBottomNav';
 import Feed from './Feed';
 
 const Home = () => {
@@ -14,7 +15,7 @@ const Home = () => {
           <LeftSidebar />
         </aside>
 
-        <section ref={feedContainerRef} className='min-w-0 flex-1 overflow-y-auto scrollbar-none py-6'>
+        <section ref={feedContainerRef} className='min-w-0 flex-1 overflow-y-auto scrollbar-none px-4 py-6 pb-20 lg:px-0 lg:pb-6'>
           <Feed feedContainerRef={feedContainerRef} />
         </section>
 
@@ -22,6 +23,8 @@ const Home = () => {
           <RightSidebar />
         </aside>
       </div>
+
+      <MobileBottomNav />
     </main>
   );
 };

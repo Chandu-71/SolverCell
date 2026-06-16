@@ -7,6 +7,7 @@ import ProblemSidePanel from '../components/workspace/ProblemSidePanel';
 import CodeEditorPanel from '../components/workspace/CodeEditorPanel';
 import TestcasePanel from '../components/workspace/TestcasePanel';
 import LeftSidebar from '../components/LeftSidebar';
+import MobileBottomNav from '../components/MobileBottomNav';
 import WorkspaceHeader from '../components/workspace/WorkspaceHeader';
 import Loading from '../components/Loading';
 
@@ -183,12 +184,15 @@ const Workspace = () => {
 
   return (
     <main className='h-screen overflow-hidden bg-black text-white'>
-      <LeftSidebar collapsed />
+      <div className='hidden lg:flex'>
+        <LeftSidebar collapsed />
+      </div>
 
-      <div className='ml-20 flex h-full flex-col'>
+      <div className='lg:ml-20 flex h-full flex-col'>
         <WorkspaceHeader problem={problem} onRun={handleRun} runLoading={runLoading} onSubmit={handleSubmit} submitLoading={submitLoading} />
 
-        <div className='flex-1 overflow-hidden pb-3 pr-2'>
+        {/* ── DESKTOP VIEW (hidden on mobile) ── */}
+        <div className='hidden lg:block flex-1 overflow-hidden pb-3 pr-2'>
           <div className='h-full overflow-hidden bg-black'>
             <Split className='flex h-full gap-0.4' sizes={[52.8, 47.2]} minSize={0} gutterSize={8}>
               <div className='overflow-hidden rounded-xl border border-white/6 bg-[#0b0b0b]'>
@@ -229,7 +233,49 @@ const Workspace = () => {
             </Split>
           </div>
         </div>
+
+        {/* ── MOBILE VIEW (Vertical Stack, hidden on desktop) ── */}
+        <div className='flex lg:hidden flex-1 flex-col overflow-y-auto px-3 pb-24 gap-4 scrollbar-none'>
+          {/* Problem Description Panel */}
+          <div className='shrink-0 rounded-2xl border border-white/6 bg-[#0b0b0b]'>
+            <ProblemSidePanel
+              problem={problem}
+              activeTab={activeSideTab}
+              setActiveTab={setActiveSideTab}
+              submissions={submissions}
+              submissionsLoading={submissionsLoading}
+            />
+          </div>
+
+          {/* Code Editor Panel */}
+          <div className='h-110 shrink-0 overflow-hidden rounded-2xl border border-white/6 bg-[#0b0b0b]'>
+            <CodeEditorPanel
+              problem={problem}
+              onCodeChange={(c, l) => {
+                setCode(c);
+                setLang(l);
+              }}
+            />
+          </div>
+
+          {/* Testcases Panel */}
+          <div className='h-75 shrink-0 overflow-hidden rounded-2xl border border-white/6 bg-[#0b0b0b]'>
+            <TestcasePanel
+              problem={problem}
+              runResult={runResult}
+              submitResult={submitResult}
+              runInput={runInput}
+              setRunInput={value => {
+                setRunInput(value);
+                setRunResult(null);
+                setSubmitResult(null);
+              }}
+            />
+          </div>
+        </div>
       </div>
+
+      <MobileBottomNav />
     </main>
   );
 };

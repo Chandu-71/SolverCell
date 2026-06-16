@@ -362,6 +362,9 @@ const CodeEditorPanel = ({ problem, onCodeChange }) => {
               horizontalScrollbarSize: 6,
               verticalSliderSize: 6,
               horizontalSliderSize: 6,
+
+              // STOP MONACO FROM EATING ALL SCROLL EVENTS
+              alwaysConsumeMouseWheel: false,
             },
           }}
         />

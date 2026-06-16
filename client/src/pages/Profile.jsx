@@ -6,6 +6,7 @@ import useCurrentUser from '../hooks/useCurrentUser';
 import Loading from '../components/Loading';
 
 import LeftSidebar from '../components/LeftSidebar';
+import MobileBottomNav from '../components/MobileBottomNav';
 import Footer from '../components/Footer';
 import FollowModal from '../components/profile/FollowModal';
 import EditProfileModal from '../components/profile/EditProfileModal';
@@ -249,15 +250,40 @@ const Profile = () => {
         <LeftSidebar />
       </aside>
 
-      <div className='min-w-0 flex-1 overflow-y-auto'>
+      <div className='min-w-0 flex-1 overflow-y-auto pb-20 lg:pb-0'>
         {/* MAIN PROFILE CONTENT */}
-        <section className='min-w-0 min-h-full py-6 px-6'>
+        <section className='min-w-0 min-h-full py-6 px-4 sm:px-6'>
           <div className='overflow-hidden rounded-3xl border border-white/5 bg-[#050505]'>
-            <div className='p-8'>
+            <div className='p-5 sm:p-8'>
               {/* HEADER ROW */}
-              <div className='flex flex-col gap-8 sm:flex-row sm:items-center'>
-                {/* AVATAR */}
-                <div className='shrink-0 flex items-center justify-center'>
+              <div className='flex flex-col gap-5 sm:flex-row sm:items-center sm:gap-8'>
+                {/* ── MOBILE TOP ROW - Hidden on desktop ── */}
+                <div className='flex items-center gap-4 sm:hidden mb-2'>
+                  <div className='shrink-0'>
+                    <img
+                      src={profile.avatarUrl || '/default-avatar.png'}
+                      alt={`${profile.username}'s profile`}
+                      className='h-20 w-20 rounded-full border border-white/10 object-cover'
+                    />
+                  </div>
+                  <div className='flex flex-1 items-center justify-around'>
+                    <div className='flex flex-col items-center'>
+                      <span className='text-base font-bold text-white'>{solvedCount}</span>
+                      <span className='text-[11px] text-slate-400'>Solved</span>
+                    </div>
+                    <button onClick={() => setFollowModalType('followers')} className='flex flex-col items-center cursor-pointer'>
+                      <span className='text-base font-bold text-white'>{followersCount}</span>
+                      <span className='text-[11px] text-slate-400'>Followers</span>
+                    </button>
+                    <button onClick={() => setFollowModalType('following')} className='flex flex-col items-center cursor-pointer'>
+                      <span className='text-base font-bold text-white'>{followingCount}</span>
+                      <span className='text-[11px] text-slate-400'>Following</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* ── DESKTOP AVATAR - Hidden on mobile ── */}
+                <div className='hidden sm:flex shrink-0 items-center justify-center'>
                   <img
                     src={profile.avatarUrl || '/default-avatar.png'}
                     alt={`${profile.username}'s profile`}
@@ -267,13 +293,14 @@ const Profile = () => {
 
                 {/* USER INFO */}
                 <div className='flex-1'>
-                  <div className='flex flex-wrap items-start justify-between gap-4'>
+                  <div className='flex flex-col sm:flex-row sm:flex-wrap sm:items-start justify-between gap-4'>
                     <div>
-                      <h1 className='text-2xl font-extrabold tracking-tight text-white'>{profile.displayName}</h1>
-                      <p className='text-slate-400'>@{profile.username}</p>
+                      <h1 className='text-xl sm:text-2xl font-extrabold tracking-tight text-white'>{profile.displayName}</h1>
+                      <p className='text-sm sm:text-base text-slate-400'>@{profile.username}</p>
                     </div>
 
-                    <div className='flex items-center gap-3'>
+                    {/* ── DESKTOP ACTION BUTTONS - Hidden on mobile ── */}
+                    <div className='hidden sm:flex items-center gap-3'>
                       {isOwnProfile ? (
                         <>
                           <button
@@ -317,7 +344,7 @@ const Profile = () => {
                   {profile.bio && <p className='mt-4 leading-relaxed text-slate-300'>{profile.bio}</p>}
 
                   {/* META */}
-                  <div className='mt-4 flex flex-wrap gap-5 text-sm text-slate-400'>
+                  <div className='mt-4 flex flex-wrap gap-3 sm:gap-5 text-sm text-slate-400'>
                     {profile.location && (
                       <div className='flex items-center gap-1.5'>
                         <MapPin className='h-4 w-4' />
@@ -336,14 +363,54 @@ const Profile = () => {
                     </div>
                   </div>
 
-                  {/* FOLLOW STATS */}
-                  <div className='mt-5 flex gap-6 text-sm'>
+                  {/* ── DESKTOP FOLLOW STATS - Hidden on mobile ── */}
+                  <div className='mt-5 hidden sm:flex gap-6 text-sm'>
                     <button onClick={() => setFollowModalType('following')} className='cursor-pointer text-left hover:underline'>
                       <span className='font-bold text-white'>{followingCount}</span> <span className='text-slate-400'>Following</span>
                     </button>
                     <button onClick={() => setFollowModalType('followers')} className='cursor-pointer text-left hover:underline'>
                       <span className='font-bold text-white'>{followersCount}</span> <span className='text-slate-400'>Followers</span>
                     </button>
+                  </div>
+
+                  {/* ── MOBILE ACTION BUTTONS - Hidden on desktop ── */}
+                  <div className='mt-5 flex w-full gap-2 sm:hidden'>
+                    {isOwnProfile ? (
+                      <>
+                        <button
+                          onClick={() => setEditOpen(true)}
+                          className='flex-1 flex justify-center cursor-pointer rounded-full border border-white/10 bg-white/5 px-5 py-2 text-sm font-semibold text-white transition-all duration-200 hover:border-red-500/20 hover:bg-red-500/10'
+                        >
+                          Edit Profile
+                        </button>
+                        <button
+                          onClick={() => signOut(() => navigate('/login'))}
+                          className='flex-1 flex justify-center cursor-pointer rounded-full border border-red-500/10 bg-red-500/5 px-5 py-2 text-sm font-semibold text-red-300 transition-all duration-200 hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-200'
+                        >
+                          Logout
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button
+                          onClick={handleFollowToggle}
+                          disabled={followLoading}
+                          className={`flex-1 flex justify-center cursor-pointer rounded-full px-5 py-2 text-sm font-semibold text-white transition disabled:opacity-70 ${
+                            isFollowing ? 'bg-white/10 hover:bg-white/20' : 'bg-red-500 hover:bg-red-600'
+                          }`}
+                        >
+                          {followLoading ? '...' : isFollowing ? 'Following' : 'Follow'}
+                        </button>
+                        <button
+                          onClick={handleMessageClick}
+                          disabled={messageLoading}
+                          className='flex-1 flex justify-center cursor-pointer items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-5 py-2 text-sm font-semibold text-white transition-all duration-200 hover:border-red-500/20 hover:bg-red-500/10 disabled:opacity-70'
+                        >
+                          <MessageSquare className='h-4 w-4' />
+                          {messageLoading ? '...' : 'Message'}
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
@@ -352,7 +419,7 @@ const Profile = () => {
               <div className='mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4'>
                 {/* COMPETITIVE RATING WIDGET */}
                 <div className='flex flex-col justify-between rounded-xl border border-white/5 bg-[#0b0b0b] p-3.5 transition hover:border-yellow-500/30 hover:bg-[#101010]'>
-                  <div className='flex items-center justify-between'>
+                  <div className='flex flex-wrap sm:flex-nowrap items-center justify-between gap-y-1'>
                     <div className='flex items-center gap-2 text-yellow-400'>
                       <Trophy className='h-4 w-4' />
                       <p className='text-xs text-slate-300'>Competitive</p>
@@ -363,8 +430,7 @@ const Profile = () => {
                     </div>
                   </div>
 
-                  {/* Ranks */}
-                  <div className='mt-2 flex items-center justify-between border-t border-white/5 pt-2'>
+                  <div className='mt-2 flex flex-wrap sm:flex-nowrap items-center justify-between gap-y-2 gap-x-2 border-t border-white/5 pt-2'>
                     <div>
                       <p className='text-[10px] text-slate-400'>All-Time Rank</p>
                       <p className='text-xs font-bold text-white'>{allTimeRank != null ? `#${allTimeRank}` : '—'}</p>
@@ -420,6 +486,8 @@ const Profile = () => {
           isOwnProfile={isOwnProfile}
         />
       )}
+
+      <MobileBottomNav />
     </main>
   );
 };

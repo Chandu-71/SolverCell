@@ -84,8 +84,8 @@ const FollowModal = ({ title, users, onClose, isOwnProfile }) => {
   const isOwnFollowingList = isOwnProfile && title === 'Following';
 
   return (
-    <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm'>
-      <div className='flex h-150 w-full max-w-lg flex-col overflow-hidden rounded-3xl border border-white/8 bg-[#0a0a0a] shadow-2xl'>
+    <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm'>
+      <div className='flex h-130 sm:h-150 w-full max-w-lg flex-col overflow-hidden rounded-3xl border border-white/8 bg-[#0a0a0a] shadow-2xl'>
         {/* HEADER */}
         <div className='flex items-center justify-between border-b border-white/6 px-6 py-4'>
           <h2 className='text-lg font-semibold text-white'>{title}</h2>

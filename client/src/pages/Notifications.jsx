@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@clerk/react';
-import { Heart, MessageCircle, UserPlus, Bell, Loader2 } from 'lucide-react';
+import { Bell, Loader2 } from 'lucide-react';
 import { formatDistanceToNow, isToday, isYesterday, isThisWeek } from 'date-fns';
 
 import LeftSidebar from '../components/LeftSidebar';
+import MobileBottomNav from '../components/MobileBottomNav';
 import Footer from '../components/Footer';
 import useSocket from '../hooks/useSocket';
 import useNotificationCount from '../hooks/useNotificationCount';
@@ -89,11 +90,11 @@ const Notifications = () => {
     return () => {
       socket.off('notification:new', onNewNotification);
     };
-  }, []);
+  }, [socket]);
 
   useEffect(() => {
     setCount(0);
-  }, [notifications.length]);
+  }, [notifications.length, setCount]);
 
   // mark read on open
   useEffect(() => {
@@ -115,7 +116,7 @@ const Notifications = () => {
     };
 
     markRead();
-  }, []);
+  }, [getToken, setCount]);
 
   const handleClick = notification => {
     const payload = notification.payload;
@@ -144,20 +145,22 @@ const Notifications = () => {
 
   return (
     <div className='flex h-screen bg-black text-white'>
-      <LeftSidebar />
+      <aside className='hidden lg:flex shrink-0'>
+        <LeftSidebar />
+      </aside>
 
-      <div className='min-w-0 flex-1 overflow-y-auto'>
-        <main className='mx-auto min-h-full flex-1 px-5 py-6'>
+      <div className='min-w-0 flex-1 overflow-y-auto pb-20 lg:pb-0'>
+        <main className='mx-auto min-h-full flex-1 px-3 py-4 sm:px-5 sm:py-6'>
           <div className='mx-auto max-w-2xl'>
             {/* header */}
-            <div className='mb-6 flex items-center gap-3'>
+            <div className='mb-4 sm:mb-6 flex items-center gap-3'>
               <div className='flex h-11 w-11 items-center justify-center rounded-2xl bg-red-500/40'>
                 <Bell size={22} className='text-slate-100' />
               </div>
 
               <div>
-                <h1 className='text-2xl font-bold text-white'>Notifications</h1>
-                <p className='text-sm text-slate-500'>Your recent activity and interactions</p>
+                <h1 className='text-xl sm:text-2xl font-bold text-white'>Notifications</h1>
+                <p className='text-xs sm:text-sm text-slate-500'>Your recent activity and interactions</p>
               </div>
             </div>
 
@@ -177,7 +180,7 @@ const Notifications = () => {
                 <p className='mt-1 text-sm text-slate-600'>Community activity on your problems and profile will appear here.</p>
               </div>
             ) : (
-              <div className='space-y-8'>
+              <div className='space-y-6 sm:space-y-8'>
                 {sections.map(section => {
                   const items = groupedNotifications[section.key];
 
@@ -188,9 +191,7 @@ const Notifications = () => {
                       {/* section heading */}
                       <div className='mb-3 flex items-center gap-3'>
                         <div className='h-px flex-1 bg-white/6' />
-
                         <h2 className='shrink-0 text-xs font-semibold uppercase tracking-wider text-slate-500'>{section.label}</h2>
-
                         <div className='h-px flex-1 bg-white/6' />
                       </div>
 
@@ -204,7 +205,7 @@ const Notifications = () => {
                             <button
                               key={notification.id}
                               onClick={() => handleClick(notification)}
-                              className='flex w-full cursor-pointer items-center gap-4 rounded-2xl border border-white/6 bg-[#0f0f0f] p-4 text-left transition hover:border-white/10 hover:bg-[#151515]'
+                              className='flex w-full cursor-pointer items-start sm:items-center gap-3 sm:gap-4 rounded-2xl border border-white/6 bg-[#0f0f0f] p-3 sm:p-4 text-left transition hover:border-white/10 hover:bg-[#151515]'
                             >
                               {/* actor avatar */}
                               {actor?.avatarUrl ? (
@@ -215,7 +216,7 @@ const Notifications = () => {
                                   }}
                                   src={actor.avatarUrl}
                                   alt={actor.username}
-                                  className='h-12 w-12 shrink-0 cursor-pointer rounded-full border-2 border-white/10 object-cover transition hover:border-red-500 hover:opacity-80'
+                                  className='h-10 w-10 sm:h-12 sm:w-12 shrink-0 cursor-pointer rounded-full border-2 border-white/10 object-cover transition hover:border-red-500 hover:opacity-80'
                                 />
                               ) : (
                                 <div
@@ -223,7 +224,7 @@ const Notifications = () => {
                                     e.stopPropagation();
                                     if (actor?.username) navigate(`/profile/${actor.username}`);
                                   }}
-                                  className='flex h-12 w-12 shrink-0 cursor-pointer items-center justify-center rounded-full border border-white/10 bg-white/5 text-lg font-semibold text-slate-400 transition hover:border-red-500 hover:opacity-80 uppercase'
+                                  className='flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 cursor-pointer items-center justify-center rounded-full border border-white/10 bg-white/5 text-base sm:text-lg font-semibold text-slate-400 transition hover:border-red-500 hover:opacity-80 uppercase'
                                 >
                                   {actor?.username?.[0] || '?'}
                                 </div>
@@ -231,7 +232,7 @@ const Notifications = () => {
 
                               {/* body */}
                               <div className='min-w-0 flex-1'>
-                                <div className='flex items-start justify-between gap-3'>
+                                <div className='flex flex-col sm:flex-row sm:items-start justify-between gap-1 sm:gap-3'>
                                   <div className='min-w-0 flex-1'>
                                     {/* text */}
                                     <p className='text-sm leading-relaxed text-slate-300'>
@@ -266,7 +267,7 @@ const Notifications = () => {
                                   </div>
 
                                   {/* time */}
-                                  <span className='shrink-0 pt-0.5 text-xs text-slate-600'>
+                                  <span className='shrink-0 sm:pt-0.5 text-xs text-slate-600'>
                                     {formatDistanceToNow(new Date(notification.createdAt), {
                                       addSuffix: true,
                                     })}
@@ -287,6 +288,8 @@ const Notifications = () => {
 
         <Footer />
       </div>
+
+      <MobileBottomNav />
     </div>
   );
 };

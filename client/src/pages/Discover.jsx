@@ -3,6 +3,7 @@ import Footer from '../components/Footer';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { Search, X, Users, Code2, CheckCircle2, Heart, Zap, ChevronDown, Loader2, TrendingUp, Clock, Star, Filter } from 'lucide-react';
 import LeftSidebar from '../components/LeftSidebar';
+import MobileBottomNav from '../components/MobileBottomNav';
 
 // ─── constants ────────────────────────────────────────────────
 const DIFFICULTIES = ['Easy', 'Medium', 'Hard'];
@@ -316,7 +317,7 @@ const Discover = () => {
       </aside>
 
       {/* MAIN */}
-      <div className='min-w-0 flex-1 overflow-y-auto'>
+      <div className='min-w-0 flex-1 overflow-y-auto pb-20 lg:pb-0'>
         <div className='mx-auto min-h-full w-full max-w-7xl px-6 py-8'>
           {/* ── PAGE HEADER ── */}
           <div className='mb-8'>
@@ -492,6 +493,8 @@ const Discover = () => {
 
         <Footer />
       </div>
+
+      <MobileBottomNav />
     </div>
   );
 };

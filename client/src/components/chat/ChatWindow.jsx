@@ -70,6 +70,7 @@ const ChatWindow = ({ conversation, currentUser, onBack }) => {
 
   // ── join room + initial load ──────────────────────────────
   useEffect(() => {
+    setMessages([]); // Prevent flashing old messages when switching chats
     fetchMessages();
 
     socket.joinConversation(conversationId);
@@ -89,7 +90,7 @@ const ChatWindow = ({ conversation, currentUser, onBack }) => {
     const onNewMessage = msg => {
       if (msg.conversationId !== conversationId) return;
       setMessages(prev => [...prev, msg]);
-      socket.markSeen(conversationId); // mark seen when window is open
+      socket.markSeen(conversationId);
       setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
     };
 
@@ -128,34 +129,56 @@ const ChatWindow = ({ conversation, currentUser, onBack }) => {
 
   // ── scroll to bottom on first load ───────────────────────
   useEffect(() => {
-    if (!loading) {
+    if (!loading && messages.length > 0) {
       bottomRef.current?.scrollIntoView();
     }
   }, [loading]);
 
   // ── load more on scroll to top ────────────────────────────
-  const handleScroll = () => {
+  const handleScroll = async () => {
     if (containerRef.current?.scrollTop === 0 && hasMore && !loadingMore) {
-      fetchMessages(messages[0]?.id, true);
+      const scrollElement = containerRef.current;
+      const previousScrollHeight = scrollElement.scrollHeight;
+
+      await fetchMessages(messages[0]?.id, true);
+
+      // Restore scroll position after DOM paints new messages
+      requestAnimationFrame(() => {
+        if (scrollElement) {
+          scrollElement.scrollTop = scrollElement.scrollHeight - previousScrollHeight;
+        }
+      });
     }
   };
 
   // ── group messages by date for separators ─────────────────
   const grouped = [];
   let lastDate = null;
+
   messages.forEach((msg, i) => {
     const label = dateLabel(msg.createdAt);
     if (label !== lastDate) {
       grouped.push({ type: 'separator', label, key: `sep-${i}` });
       lastDate = label;
     }
+
     const prev = messages[i - 1];
+    const next = messages[i + 1];
+
+    // Date boundaries
+    const isSameDateAsPrev = prev && dateLabel(prev.createdAt) === label;
+    const isSameDateAsNext = next && dateLabel(next.createdAt) === label;
+
+    // Check adjacent sender status
+    const prevSameSender = !!prev && prev.sender.id === msg.sender.id && isSameDateAsPrev;
+    const nextSameSender = !!next && next.sender.id === msg.sender.id && isSameDateAsNext;
+
     grouped.push({
       type: 'message',
       msg,
       isMine: msg.sender.id === currentUser?.id,
-      showAvatar: !prev || prev.sender.id !== msg.sender.id,
-      prevSameSender: !!prev && prev.sender.id === msg.sender.id,
+      showAvatar: !nextSameSender, // Avatar renders on the LAST message of the group
+      prevSameSender,
     });
   });
 

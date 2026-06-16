@@ -142,7 +142,7 @@ const EditProfileModal = ({ user, onClose, onSave }) => {
         </div>
 
         {/* body */}
-        <div className='max-h-[75vh] overflow-y-auto px-6 py-6 scrollbar-none'>
+        <div className='max-h-[55vh] sm:max-h-[75vh] overflow-y-auto px-6 py-6 scrollbar-none'>
           <div className='space-y-5'>
             {/* AVATAR */}
             <div className='flex flex-col items-center gap-3'>

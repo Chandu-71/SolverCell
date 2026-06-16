@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@clerk/react';
 import { Trophy, Loader2, Crown, Star, Award, Shield } from 'lucide-react';
 import LeftSidebar from '../components/LeftSidebar';
+import MobileBottomNav from '../components/MobileBottomNav';
 import Footer from '../components/Footer';
 
 // ─── constants ────────────────────────────────────────────────
@@ -42,7 +43,7 @@ const MyRankCard = ({ entry, isWeekly }) => {
           ) : (
             <>
               <p className='text-sm font-semibold text-slate-300'>Unranked This Week</p>
-              <p className='text-xs text-slate-500'>Solve problems to earn weekly points</p>
+              <p className='hidden sm:block text-xs text-slate-500'>Solve problems to earn weekly points</p>
             </>
           )}
         </div>
@@ -192,7 +193,7 @@ const Leaderboard = () => {
         <LeftSidebar />
       </aside>
 
-      <div className='min-w-0 flex-1 overflow-y-auto'>
+      <div className='min-w-0 flex-1 overflow-y-auto pb-20 lg:pb-0'>
         <div className='mx-auto min-h-full max-w-3xl px-6 py-8'>
           {/* ── PAGE HEADER ── */}
           <div className='mb-6 flex items-center gap-4'>
@@ -288,6 +289,8 @@ const Leaderboard = () => {
 
         <Footer />
       </div>
+
+      <MobileBottomNav />
     </div>
   );
 };
